@@ -7,8 +7,10 @@ import com.gym.modules.training.domain.dto.TrainingPlanGenerateDTO;
 import com.gym.modules.training.domain.entity.TrainingCheckin;
 import com.gym.modules.training.domain.entity.TrainingLog;
 import com.gym.modules.training.domain.entity.TrainingPlan;
+import com.gym.modules.training.domain.vo.TrainingGrowthVo;
 import com.gym.modules.training.domain.vo.TrainingReviewVo;
 import com.gym.modules.training.service.ITrainingCheckinService;
+import com.gym.modules.training.service.ITrainingGrowthService;
 import com.gym.modules.training.service.ITrainingLogService;
 import com.gym.modules.training.service.ITrainingPlanService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +38,9 @@ public class TrainingController {
 
     @Autowired
     private ITrainingCheckinService checkinService;
+
+    @Autowired
+    private ITrainingGrowthService growthService;
 
     @PostMapping("/plans/generate")
     @Operation(summary = "生成智能训练计划框架")
@@ -74,7 +79,7 @@ public class TrainingController {
         log.setCaloriesBurned(Math.max(0, checkin.getDurationMinutes() == null ? 0 : checkin.getDurationMinutes() * 6));
         log.setFeeling("已完成");
         log.setRemark("训练执行器自动生成");
-        logService.save(log);
+        logService.saveWithGrowth(log);
         return R.ok(checkin);
     }
 
@@ -83,7 +88,7 @@ public class TrainingController {
     public R<Void> addLog(@RequestBody TrainingLog log) {
         log.setMemberId(SecurityUtils.getUserId());
         log.setTrainingDate(log.getTrainingDate() == null ? new Date() : log.getTrainingDate());
-        return logService.save(log) ? R.ok() : R.fail("保存训练日志失败");
+        return logService.saveWithGrowth(log) ? R.ok() : R.fail("保存训练日志失败");
     }
 
     @GetMapping("/logs")
@@ -98,5 +103,11 @@ public class TrainingController {
     @Operation(summary = "获取训练复盘和成长进度")
     public R<TrainingReviewVo> review() {
         return R.ok(logService.buildMemberReview(SecurityUtils.getUserId()));
+    }
+
+    @GetMapping("/growth")
+    @Operation(summary = "获取训练成长快照")
+    public R<TrainingGrowthVo> growth() {
+        return R.ok(growthService.getMemberGrowth(SecurityUtils.getUserId()));
     }
 }

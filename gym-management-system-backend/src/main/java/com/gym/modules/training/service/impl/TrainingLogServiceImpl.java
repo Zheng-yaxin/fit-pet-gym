@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gym.modules.training.domain.entity.TrainingLog;
 import com.gym.modules.training.domain.vo.TrainingReviewVo;
 import com.gym.modules.training.mapper.TrainingLogMapper;
+import com.gym.modules.training.service.ITrainingGrowthService;
 import com.gym.modules.training.service.ITrainingLogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,6 +27,18 @@ public class TrainingLogServiceImpl extends ServiceImpl<TrainingLogMapper, Train
     private static final int DAILY_TARGET_MINUTES = 30;
     private static final int WEEKLY_TARGET_MINUTES = 150;
     private static final int XP_PER_LEVEL = 500;
+
+    @Autowired
+    private ITrainingGrowthService growthService;
+
+    @Override
+    public boolean saveWithGrowth(TrainingLog log) {
+        boolean saved = save(log);
+        if (saved && log.getMemberId() != null) {
+            growthService.refreshMemberGrowth(log.getMemberId(), log);
+        }
+        return saved;
+    }
 
     @Override
     public TrainingReviewVo buildMemberReview(Long memberId) {

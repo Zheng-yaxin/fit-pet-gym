@@ -30,6 +30,23 @@
       <el-empty v-if="!reviews.length" description="暂无训练复盘数据" />
     </section>
 
+    <section class="growth-grid">
+      <article v-for="item in growth" :key="item.memberId" class="growth-card">
+        <span>Growth · {{ item.petMood || 'idle' }}</span>
+        <strong>会员 {{ item.memberId }} · Lv.{{ item.level || 1 }}</strong>
+        <p>{{ item.badgeTitle || 'Warm-up starter badge' }}</p>
+        <div class="growth-meter">
+          <i><b :style="{ width: `${Math.min(100, item.progressPercent || 0)}%` }" /></i>
+          <em>{{ item.currentLevelXp || 0 }}/{{ item.nextLevelXp || 500 }} XP</em>
+        </div>
+        <div class="review-meta">
+          <b>总 XP {{ item.totalXp || 0 }}</b>
+          <b>最近 +{{ item.lastRewardXp || 0 }}</b>
+        </div>
+      </article>
+      <el-empty v-if="!growth.length" description="暂无训练成长快照" />
+    </section>
+
     <el-table :data="list" class="table" border>
       <el-table-column prop="memberId" label="会员ID" width="100" />
       <el-table-column prop="trainingDate" label="日期" min-width="170" />
@@ -44,20 +61,23 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { getAdminActiveTrainingCheckins, getAdminTrainingLogs, getAdminTrainingReviews } from '@/api/training'
+import { getAdminActiveTrainingCheckins, getAdminTrainingGrowth, getAdminTrainingLogs, getAdminTrainingReviews } from '@/api/training'
 
 const list = ref<any[]>([])
 const reviews = ref<any[]>([])
+const growth = ref<any[]>([])
 const activeCheckins = ref<any[]>([])
 
 const loadAll = async () => {
-  const [nextLogs, nextReviews, nextActiveCheckins] = await Promise.all([
+  const [nextLogs, nextReviews, nextGrowth, nextActiveCheckins] = await Promise.all([
     getAdminTrainingLogs(),
     getAdminTrainingReviews(),
+    getAdminTrainingGrowth(),
     getAdminActiveTrainingCheckins()
   ])
   list.value = nextLogs as any[]
   reviews.value = nextReviews as any[]
+  growth.value = nextGrowth as any[]
   activeCheckins.value = nextActiveCheckins as any[]
 }
 
@@ -96,5 +116,14 @@ h1 { margin: 0; color: #1f2937; font-size: 24px; }
 .review-card p { min-height: 42px; margin: 8px 0 12px; color: #475569; line-height: 1.5; }
 .review-meta { display: flex; gap: 8px; flex-wrap: wrap; }
 .review-meta b { border-radius: 999px; background: #f1f5f9; color: #334155; padding: 5px 10px; font-size: 12px; }
+.growth-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 20px; }
+.growth-card { border: 1px solid #bbf7d0; border-radius: 8px; background: #f0fdf4; padding: 16px; box-shadow: 0 12px 28px rgba(34, 197, 94, 0.1); }
+.growth-card span { color: #15803d; font-size: 12px; font-weight: 800; text-transform: uppercase; }
+.growth-card strong { display: block; margin-top: 8px; color: #111827; font-size: 16px; }
+.growth-card p { margin: 8px 0 12px; color: #166534; line-height: 1.5; }
+.growth-meter { display: grid; gap: 6px; margin-bottom: 10px; }
+.growth-meter i { display: block; height: 8px; border-radius: 999px; background: rgba(22, 101, 52, 0.14); overflow: hidden; }
+.growth-meter b { display: block; height: 100%; border-radius: inherit; background: #22c55e; }
+.growth-meter em { color: #166534; font-size: 12px; font-style: normal; font-weight: 700; }
 .table { border-radius: 8px; overflow: hidden; }
 </style>

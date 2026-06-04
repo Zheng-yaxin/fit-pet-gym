@@ -60,6 +60,13 @@ export function getAdminTrainingReviews() {
   })
 }
 
+export function getAdminTrainingGrowth() {
+  return request({
+    url: '/admin/training/growth',
+    method: 'get'
+  })
+}
+
 export function getAdminActiveTrainingCheckins() {
   return request({
     url: '/admin/training/checkins/active',

@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS gym_member_growth (
+  id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  member_id BIGINT NOT NULL,
+  total_xp INT DEFAULT 0,
+  level INT DEFAULT 1,
+  current_level_xp INT DEFAULT 0,
+  next_level_xp INT DEFAULT 500,
+  progress_percent INT DEFAULT 0,
+  streak_days INT DEFAULT 0,
+  total_sessions INT DEFAULT 0,
+  weekly_minutes INT DEFAULT 0,
+  weekly_sessions INT DEFAULT 0,
+  last_training_date DATETIME NULL,
+  pet_mood VARCHAR(32) DEFAULT 'idle',
+  badge_title VARCHAR(120) DEFAULT NULL,
+  last_reward_xp INT DEFAULT 0,
+  last_reward_reason VARCHAR(160) DEFAULT NULL,
+  create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+  update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uk_member_growth_member_id (member_id),
+  KEY idx_member_growth_level (level, total_xp)
+);

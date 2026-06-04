@@ -7,6 +7,8 @@ import com.gym.modules.training.domain.vo.TrainingReviewVo;
 import java.util.List;
 
 public interface ITrainingLogService extends IService<TrainingLog> {
+    boolean saveWithGrowth(TrainingLog log);
+
     TrainingReviewVo buildMemberReview(Long memberId);
 
     List<TrainingReviewVo> buildAdminReviews();

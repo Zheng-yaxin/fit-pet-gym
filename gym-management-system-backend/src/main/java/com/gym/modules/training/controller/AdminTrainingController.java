@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.gym.common.result.R;
 import com.gym.modules.training.domain.entity.TrainingCheckin;
 import com.gym.modules.training.domain.entity.TrainingLog;
+import com.gym.modules.training.domain.vo.TrainingGrowthVo;
 import com.gym.modules.training.domain.vo.TrainingReviewVo;
 import com.gym.modules.training.service.ITrainingCheckinService;
+import com.gym.modules.training.service.ITrainingGrowthService;
 import com.gym.modules.training.service.ITrainingLogService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -27,6 +29,9 @@ public class AdminTrainingController {
     @Autowired
     private ITrainingCheckinService checkinService;
 
+    @Autowired
+    private ITrainingGrowthService growthService;
+
     @GetMapping("/logs")
     @Operation(summary = "查询训练日志")
     @PreAuthorize("@ss.hasPermi('training:log:list')")
@@ -40,6 +45,13 @@ public class AdminTrainingController {
     @PreAuthorize("@ss.hasPermi('training:log:list')")
     public R<List<TrainingReviewVo>> reviews() {
         return R.ok(logService.buildAdminReviews());
+    }
+
+    @GetMapping("/growth")
+    @Operation(summary = "查询会员训练成长汇总")
+    @PreAuthorize("@ss.hasPermi('training:log:list')")
+    public R<List<TrainingGrowthVo>> growth() {
+        return R.ok(growthService.buildAdminGrowth());
     }
 
     @GetMapping("/checkins/active")
