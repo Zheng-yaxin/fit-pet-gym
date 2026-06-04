@@ -7,6 +7,8 @@ import com.gym.modules.health.domain.entity.BodyImage;
 import com.gym.modules.health.domain.entity.DietTarget;
 import com.gym.modules.health.domain.entity.Food;
 import com.gym.modules.health.domain.entity.HealthData;
+import com.gym.modules.health.domain.vo.BodyInsightVO;
+import com.gym.modules.health.domain.vo.DietActionPlanVO;
 import com.gym.modules.health.domain.vo.DietGapVO;
 import com.gym.modules.health.domain.vo.DietSummaryVO;
 import com.gym.modules.health.domain.vo.FoodAnalysisVO;
@@ -55,6 +57,12 @@ public class HealthController {
     @GetMapping("/data/history")
     public R<List<HealthData>> getHealthDataHistory() {
         return R.ok(healthService.getHealthDataHistory());
+    }
+
+    @Operation(summary = "获取身体变化解释")
+    @GetMapping("/data/insight")
+    public R<BodyInsightVO> getBodyInsight() {
+        return R.ok(healthService.getBodyInsight());
     }
 
     // --- 身材照片相关 ---
@@ -125,6 +133,12 @@ public class HealthController {
     @GetMapping("/diet/summary")
     public R<DietSummaryVO> getDietSummary(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
         return R.ok(healthService.getDailyDietAnalysis(date));
+    }
+
+    @Operation(summary = "获取饮食可执行建议")
+    @GetMapping("/diet/action-plan")
+    public R<DietActionPlanVO> getDietActionPlan(@RequestParam("date") @DateTimeFormat(pattern = "yyyy-MM-dd") Date date) {
+        return R.ok(healthService.getDietActionPlan(date));
     }
 
     @Operation(summary = "获取饮食目标")

@@ -89,6 +89,39 @@
           </button>
         </div>
 
+        <div class="insight-grid">
+          <AppleCard class="insight-card">
+            <div class="insight-title">
+              <Sparkles :size="16" class="text-orange-400" />
+              <span>饮食执行建议</span>
+            </div>
+            <p class="insight-headline">{{ dietActionPlan?.headline || '等待今日饮食数据' }}</p>
+            <p class="insight-sub">{{ dietActionPlan?.nextMealFocus || '记录一餐后会生成下一餐建议。' }}</p>
+            <ul class="insight-list">
+              <li v-for="(item, idx) in dietActionPlan?.actions?.slice(0, 3)" :key="idx">
+                <b>{{ item.title }}</b>
+                <span>{{ item.detail }}</span>
+              </li>
+            </ul>
+          </AppleCard>
+
+          <AppleCard class="insight-card">
+            <div class="insight-title">
+              <Activity :size="16" class="text-blue-400" />
+              <span>身体变化解释</span>
+            </div>
+            <p class="insight-headline">{{ bodyInsight?.headline || '等待体测记录' }}</p>
+            <p class="insight-sub">
+              {{ bodyInsight?.trendLabel || '趋势不足' }} · BMI {{ bodyInsight?.bmiStatus || '--' }}
+            </p>
+            <ul class="insight-list">
+              <li v-for="(text, idx) in [...(bodyInsight?.explanations || []), ...(bodyInsight?.actions || [])].slice(0, 3)" :key="idx">
+                <span>{{ text }}</span>
+              </li>
+            </ul>
+          </AppleCard>
+        </div>
+
         <AppleCard class="chart-card">
           <div class="relative flex justify-center items-center border-b border-gray-50 pb-4 mb-4">
             <h3 class="font-semibold text-slate-600">体重趋势</h3>
@@ -248,7 +281,9 @@ import BodyGallery from './components/BodyGallery.vue'
 import {
   getLatestHealthData,
   getHealthDataHistory,
+  getBodyInsight,
   getDietSummary,
+  getDietActionPlan,
   getBodyImageHistory,
   deleteDietLog,
   saveHealthData,
@@ -260,7 +295,7 @@ import {
   addCustomFood,
   getFoodList
 } from '@/api/health'
-import type { HealthData, DietSummaryVO, BodyImage, FoodAnalysisVO } from '@/api/health'
+import type { BodyInsightVO, DietActionPlanVO, HealthData, DietSummaryVO, BodyImage, FoodAnalysisVO } from '@/api/health'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
@@ -285,6 +320,8 @@ const dietSummary = ref<DietSummaryVO>({
   suggestions: []
 })
 const bodyImages = ref<BodyImage[]>([])
+const dietActionPlan = ref<DietActionPlanVO | null>(null)
+const bodyInsight = ref<BodyInsightVO | null>(null)
 const showDietModal = ref(false)
 const showHealthModal = ref(false)
 const showBodyGallery = ref(false)
@@ -347,10 +384,12 @@ const formatLastUpdate = (time: string) => {
 const fetchData = async () => {
   isUpdating.value = true
   try {
-    const [latest, history, diet, images] = await Promise.all([
+    const [latest, history, diet, actionPlan, insight, images] = await Promise.all([
       getLatestHealthData(),
       getHealthDataHistory(),
       getDietSummary(currentDate.value),
+      getDietActionPlan(currentDate.value),
+      getBodyInsight(),
       getBodyImageHistory()
     ])
     console.log('Latest health data:', latest)
@@ -365,6 +404,8 @@ const fetchData = async () => {
 
     historyData.value = history || []
     dietSummary.value = diet || dietSummary.value
+    dietActionPlan.value = actionPlan || null
+    bodyInsight.value = insight || null
     bodyImages.value = images || []
   } catch(e) {
     console.error('Fetch data error:', e)
@@ -670,6 +711,69 @@ onMounted(() => fetchData())
   .pastel-pink-bg   { background: #FCE7F3; color: #EC4899; }
 
   .label { font-size: 13px; color: #64748B; font-weight: 600; }
+}
+
+.insight-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  @media (min-width: 780px) { grid-template-columns: 1fr 1fr; }
+}
+
+.insight-card {
+  padding: 24px;
+  min-height: 220px;
+  background: white;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.insight-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748B;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.insight-headline {
+  color: #334155;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.insight-sub {
+  color: #94A3B8;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.insight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 4px;
+  color: #64748B;
+  font-size: 13px;
+  line-height: 1.55;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-left: 12px;
+    border-left: 3px solid #FED7AA;
+  }
+
+  b {
+    color: #334155;
+    font-weight: 800;
+  }
 }
 
 /* 3. 列表区域 */

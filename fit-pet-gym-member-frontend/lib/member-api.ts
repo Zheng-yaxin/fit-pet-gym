@@ -46,6 +46,26 @@ export type DietGap = {
   carbohydrateGap?: number;
 };
 
+export type DietActionPlan = {
+  date?: string;
+  status?: string;
+  headline?: string;
+  nextMealFocus?: string;
+  caloriesGap?: number;
+  proteinGap?: number;
+  fatGap?: number;
+  carbohydrateGap?: number;
+  actions?: DietActionItem[];
+  notes?: string[];
+};
+
+export type DietActionItem = {
+  kind?: string;
+  priority?: string;
+  title?: string;
+  detail?: string;
+};
+
 export type DietSummary = {
   date?: string;
   totalCalories?: number;
@@ -58,6 +78,21 @@ export type DietSummary = {
   recommendCarb?: number;
   suggestions?: string[];
   details?: DietDetail[];
+};
+
+export type BodyInsight = {
+  status?: string;
+  headline?: string;
+  bmiStatus?: string;
+  trendLabel?: string;
+  latestWeight?: number;
+  latestBmi?: number;
+  latestBodyFatRate?: number;
+  weightDelta?: number;
+  bodyFatDelta?: number;
+  latestMeasureTime?: string;
+  explanations?: string[];
+  actions?: string[];
 };
 
 export type DietTarget = {
@@ -408,6 +443,10 @@ export function getDietGap(date: string) {
   return apiRequest<DietGap>(`/health/diet/gap?date=${encodeURIComponent(date)}`);
 }
 
+export function getDietActionPlan(date: string) {
+  return apiRequest<DietActionPlan>(`/health/diet/action-plan?date=${encodeURIComponent(date)}`);
+}
+
 export function getDietSummary(date: string) {
   return apiRequest<DietSummary>(`/health/diet/summary?date=${encodeURIComponent(date)}`);
 }
@@ -458,6 +497,10 @@ export function analyzeFoodImage(file: File) {
 
 export function getHealthDataHistory() {
   return apiRequest<HealthData[]>("/health/data/history");
+}
+
+export function getBodyInsight() {
+  return apiRequest<BodyInsight>("/health/data/insight");
 }
 
 export function uploadBodyImage(file: File) {

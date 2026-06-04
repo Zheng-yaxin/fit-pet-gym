@@ -53,6 +53,41 @@ export interface DietSummaryVO {
     details: DietDetailVO[]
 }
 
+export interface DietActionItem {
+    kind?: string
+    priority?: string
+    title?: string
+    detail?: string
+}
+
+export interface DietActionPlanVO {
+    date?: string
+    status?: string
+    headline?: string
+    nextMealFocus?: string
+    caloriesGap?: number
+    proteinGap?: number
+    fatGap?: number
+    carbohydrateGap?: number
+    actions?: DietActionItem[]
+    notes?: string[]
+}
+
+export interface BodyInsightVO {
+    status?: string
+    headline?: string
+    bmiStatus?: string
+    trendLabel?: string
+    latestWeight?: number
+    latestBmi?: number
+    latestBodyFatRate?: number
+    weightDelta?: number
+    bodyFatDelta?: number
+    latestMeasureTime?: string
+    explanations?: string[]
+    actions?: string[]
+}
+
 export interface BodyImage {
     id: number
     imageUrl: string
@@ -81,6 +116,13 @@ export function getLatestHealthData() {
 export function getHealthDataHistory() {
     return request<HealthData[]>({
         url: '/health/data/history',
+        method: 'get'
+    })
+}
+
+export function getBodyInsight() {
+    return request<BodyInsightVO>({
+        url: '/health/data/insight',
         method: 'get'
     })
 }
@@ -154,6 +196,14 @@ export function deleteDietLog(id: number) {
 export function getDietSummary(date: string) {
     return request<DietSummaryVO>({
         url: '/health/diet/summary',
+        method: 'get',
+        params: { date }
+    })
+}
+
+export function getDietActionPlan(date: string) {
+    return request<DietActionPlanVO>({
+        url: '/health/diet/action-plan',
         method: 'get',
         params: { date }
     })

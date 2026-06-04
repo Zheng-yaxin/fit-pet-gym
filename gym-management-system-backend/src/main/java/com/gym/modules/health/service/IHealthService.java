@@ -4,6 +4,8 @@ import com.gym.modules.health.domain.dto.DietRecordDTO;
 import com.gym.modules.health.domain.entity.BodyImage;
 import com.gym.modules.health.domain.entity.Food;
 import com.gym.modules.health.domain.entity.HealthData;
+import com.gym.modules.health.domain.vo.BodyInsightVO;
+import com.gym.modules.health.domain.vo.DietActionPlanVO;
 import com.gym.modules.health.domain.vo.DietSummaryVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,4 +40,8 @@ public interface IHealthService {
     void deleteDietLog(Long id);
 
     DietSummaryVO getDailyDietAnalysis(Date date);
+
+    DietActionPlanVO getDietActionPlan(Date date);
+
+    BodyInsightVO getBodyInsight();
 }

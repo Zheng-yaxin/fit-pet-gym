@@ -8,12 +8,14 @@ import { FeatureStatusCard } from "@/components/motion/feature-status-card";
 import {
   addCustomFood,
   analyzeFoodImage,
+  getDietActionPlan,
   getDietGap,
   getDietSummary,
   getDietTarget,
   getFoodList,
   recordDiet,
   saveDietTarget,
+  type DietActionPlan,
   type DietGap,
   type DietSummary,
   type DietTarget,
@@ -29,6 +31,7 @@ export default function HealthPage() {
   const [date, setDate] = useState(todayDateString());
   const [summary, setSummary] = useState<DietSummary | null>(null);
   const [gap, setGap] = useState<DietGap | null>(null);
+  const [actionPlan, setActionPlan] = useState<DietActionPlan | null>(null);
   const [target, setTarget] = useState<DietTarget | null>(null);
   const [foods, setFoods] = useState<Food[]>([]);
   const [foodKeyword, setFoodKeyword] = useState("");
@@ -49,10 +52,10 @@ export default function HealthPage() {
     setLoading(true);
     setError("");
     try {
-      const [nextSummary, nextGap, nextTarget, nextFoods] = await Promise.all([
-        getDietSummary(date), getDietGap(date), getDietTarget(), getFoodList(foodKeyword)
+      const [nextSummary, nextGap, nextPlan, nextTarget, nextFoods] = await Promise.all([
+        getDietSummary(date), getDietGap(date), getDietActionPlan(date), getDietTarget(), getFoodList(foodKeyword)
       ]);
-      setSummary(nextSummary); setGap(nextGap); setTarget(nextTarget);
+      setSummary(nextSummary); setGap(nextGap); setActionPlan(nextPlan); setTarget(nextTarget);
       setFoods(nextFoods ?? []);
       if (!selectedFoodId && nextFoods?.[0]?.id) setSelectedFoodId(String(nextFoods[0].id));
     } catch (err) { setError(err instanceof Error ? err.message : "饮食数据加载失败。"); }
@@ -165,6 +168,32 @@ export default function HealthPage() {
             <article className="feature-data"><span>蛋白质</span><h2>{summary?.totalProtein ?? 0} g</h2><p>建议 {summary?.recommendProtein ?? target?.proteinTarget ?? "--"} g</p></article>
             <article className="feature-data"><span>碳水 / 脂肪</span><h2>{summary?.totalCarb ?? 0}g / {summary?.totalFat ?? 0}g</h2><p>{loading ? "加载中..." : "今日营养总览"}</p></article>
           </div>
+
+          {actionPlan ? (
+            <section className="fitpet-record-section" style={{ marginTop: 20 }}>
+              <div className="feature-heading">
+                <span>Action Plan</span>
+                <h2>下一餐怎么吃</h2>
+                <p>{actionPlan.headline ?? "根据今日摄入和目标，生成可执行的饮食调整。"}</p>
+              </div>
+              <div className="feature-grid two">
+                <article className="feature-data">
+                  <span><Info size={14} /> 重点</span>
+                  <h2 style={{ fontSize: 22 }}>{actionPlan.nextMealFocus ?? "--"}</h2>
+                  <p>热量差 {actionPlan.caloriesGap ?? "--"} kcal / 蛋白差 {actionPlan.proteinGap ?? "--"}g</p>
+                </article>
+                <article className="feature-list">
+                  <span>行动清单</span>
+                  {(actionPlan.actions ?? []).slice(0, 4).map((item, index) => (
+                    <p key={`${item.kind}-${index}`}>
+                      <b>{item.title ?? "建议"}</b><br />
+                      {item.detail ?? ""}
+                    </p>
+                  ))}
+                </article>
+              </div>
+            </section>
+          ) : null}
 
           {/* ========== AI 食物识别 ========== */}
           <div className="feature-form" style={{ marginTop: 20 }}>

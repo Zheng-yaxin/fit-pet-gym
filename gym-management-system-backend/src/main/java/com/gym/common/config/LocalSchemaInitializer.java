@@ -19,6 +19,7 @@ public class LocalSchemaInitializer {
         ensureExerciseColumns();
         ensureMemberGrowthTable();
         ensureFeedbackColumns();
+        ensureHealthIndexes();
     }
 
     private void ensureMemberGrowthTable() {
@@ -87,6 +88,12 @@ public class LocalSchemaInitializer {
         ensureIndex("gym_course_feedback", "idx_course_feedback_type", "feedback_type");
         ensureIndex("gym_course_feedback", "idx_course_feedback_handle_status", "handle_status");
         ensureIndex("gym_course_feedback", "idx_course_feedback_followup_chat", "member_id, coach_id, follow_up_required");
+    }
+
+    private void ensureHealthIndexes() {
+        ensureIndex("gym_health_data", "idx_health_data_user_measure", "user_id, measure_time");
+        ensureIndex("gym_diet_log", "idx_diet_log_user_date", "user_id, eat_date");
+        ensureIndex("gym_diet_target", "idx_diet_target_user", "user_id");
     }
 
     private void ensureIndex(String tableName, String indexName, String columnName) {

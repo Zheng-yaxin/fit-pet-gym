@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { ArrowLeft, LineChart, Save } from "lucide-react";
 import { FeatureMotionDirector } from "@/components/motion/feature-motion-director";
 import { FeatureStatusCard } from "@/components/motion/feature-status-card";
-import { getHealthDataHistory, getLatestHealthData, saveHealthData, type HealthData } from "@/lib/member-api";
+import { getBodyInsight, getHealthDataHistory, getLatestHealthData, saveHealthData, type BodyInsight, type HealthData } from "@/lib/member-api";
 import { calculateAge } from "@/lib/home-model";
 import "../feature-placeholder.css";
 
@@ -16,6 +16,7 @@ function nowDateTime() {
 export default function BodyPage() {
   const [latest, setLatest] = useState<HealthData | null>(null);
   const [history, setHistory] = useState<HealthData[]>([]);
+  const [insight, setInsight] = useState<BodyInsight | null>(null);
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [bodyFatRate, setBodyFatRate] = useState("");
@@ -38,9 +39,10 @@ export default function BodyPage() {
     setLoading(true);
     setError("");
     try {
-      const [nextLatest, nextHistory] = await Promise.all([getLatestHealthData(), getHealthDataHistory()]);
+      const [nextLatest, nextHistory, nextInsight] = await Promise.all([getLatestHealthData(), getHealthDataHistory(), getBodyInsight()]);
       setLatest(nextLatest);
       setHistory(nextHistory ?? []);
+      setInsight(nextInsight);
       setHeight(nextLatest?.height ? String(nextLatest.height) : "");
       setWeight(nextLatest?.weight ? String(nextLatest.weight) : "");
       setBodyFatRate(nextLatest?.bodyFatRate ? String(nextLatest.bodyFatRate) : "");
@@ -105,6 +107,29 @@ export default function BodyPage() {
             <article className="feature-data"><span>体脂率</span><h2>{latest?.bodyFatRate ? `${latest.bodyFatRate}%` : "--"}</h2><p>{calculateAge(latest?.birthDate) ? `年龄 ${calculateAge(latest?.birthDate)}` : "暂无"}</p></article>
             <article className="feature-data"><span>记录数</span><h2>{history.length}</h2><p>条历史体测</p></article>
           </div>
+
+          {insight ? (
+            <section className="fitpet-record-section" style={{ marginTop: 20 }}>
+              <div className="feature-heading">
+                <span>Body Insight</span>
+                <h2>{insight.trendLabel ?? "身体趋势"}</h2>
+                <p>{insight.headline ?? "根据最近体测解释身体变化。"}</p>
+              </div>
+              <div className="feature-grid two">
+                <article className="feature-data">
+                  <span>BMI 状态</span>
+                  <h2>{insight.bmiStatus ?? "--"}</h2>
+                  <p>体重变化 {insight.weightDelta ?? 0} kg / 体脂变化 {insight.bodyFatDelta ?? 0}%</p>
+                </article>
+                <article className="feature-list">
+                  <span>解释与下一步</span>
+                  {[...(insight.explanations ?? []), ...(insight.actions ?? [])].slice(0, 5).map((text, index) => (
+                    <p key={index}>{text}</p>
+                  ))}
+                </article>
+              </div>
+            </section>
+          ) : null}
 
           <div className="feature-grid two">
             <form className="feature-form" onSubmit={handleSave}>
