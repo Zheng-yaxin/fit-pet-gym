@@ -100,6 +100,11 @@
                     <el-icon><RefreshLeft /></el-icon>
                   </button>
                 </el-tooltip>
+                <el-tooltip content="权益与场馆资产" placement="top" :hide-after="0" effect="light">
+                  <button @click="handleShowBenefits(scope.row)" class="w-8 h-8 rounded-lg hover:bg-sky-50 text-slate-400 hover:text-sky-500 transition-all flex items-center justify-center">
+                    <el-icon><InfoFilled /></el-icon>
+                  </button>
+                </el-tooltip>
                 <el-tooltip content="挂失" placement="top" :hide-after="0" effect="light">
                   <button @click="handleReportLoss(scope.row)" class="w-8 h-8 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-500 transition-all flex items-center justify-center" v-if="scope.row.status === '0'">
                     <el-icon><WarningFilled /></el-icon>
@@ -125,6 +130,47 @@
       </div>
     </div>
 
+    <el-drawer v-model="benefitVisible" title="会员权益与场馆资产" size="420px">
+      <div v-loading="benefitLoading" class="benefit-drawer">
+        <template v-if="currentBenefit">
+          <section class="benefit-hero">
+            <span>{{ currentBenefit.active ? 'ACTIVE BENEFITS' : 'NO ACTIVE CARD' }}</span>
+            <h2>{{ currentBenefit.card?.cardType || '未激活' }}</h2>
+            <p>
+              余额 ¥{{ Number(currentBenefit.walletBalance || 0).toFixed(2) }}
+              <template v-if="currentBenefit.daysLeft !== undefined"> · 剩余 {{ currentBenefit.daysLeft }} 天</template>
+            </p>
+          </section>
+
+          <section class="benefit-metrics">
+            <article><span>团课额度</span><strong>{{ currentBenefit.groupCourseQuota || 0 }}</strong></article>
+            <article><span>私教额度</span><strong>{{ currentBenefit.privateTrainingQuota || 0 }}</strong></article>
+            <article><span>储物柜</span><strong>{{ currentBenefit.lockerAccess ? '可用' : '无' }}</strong></article>
+          </section>
+
+          <section class="benefit-section">
+            <h3>权益动作</h3>
+            <p v-for="item in currentBenefit.entitlements || []" :key="item">{{ item }}</p>
+            <p v-for="item in currentBenefit.actions || []" :key="item" class="accent">{{ item }}</p>
+          </section>
+
+          <section class="benefit-section">
+            <h3>绑定器材</h3>
+            <p v-for="asset in (currentBenefit.availableAssets || []).slice(0, 6)" :key="asset.equipmentId">
+              {{ asset.name || '器材' }} · {{ asset.location || '待确认' }} · {{ asset.statusDesc || '可用' }}
+            </p>
+          </section>
+
+          <section class="benefit-section">
+            <h3>推荐场区</h3>
+            <p v-for="area in currentBenefit.recommendedAreas || []" :key="area.areaId">
+              {{ area.areaName || '场区' }} · {{ area.occupancyPercent || 0 }}% · {{ area.action || '适合下一组训练' }}
+            </p>
+          </section>
+        </template>
+      </div>
+    </el-drawer>
+
     <CardRenewModal v-model="renewVisible" :card="currentCard" @success="handleQuery" />
   </div>
 </template>
@@ -132,11 +178,11 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue'
 import {
-  Search, Refresh, RefreshLeft, WarningFilled
+  Search, Refresh, RefreshLeft, WarningFilled, InfoFilled
 } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import CardRenewModal from './components/CardRenewModal.vue'
-import { getMemberCardList, reportLossCard, type MemberCard } from '@/api/member'
+import { getMemberBenefitSummary, getMemberCardList, reportLossCard, type MemberBenefitSummary, type MemberCard } from '@/api/member'
 
 const loading = ref(false)
 const cardList = ref<MemberCard[]>([])
@@ -150,6 +196,9 @@ const queryParams = reactive({
 
 const renewVisible = ref(false)
 const currentCard = ref<MemberCard | null>(null)
+const benefitVisible = ref(false)
+const benefitLoading = ref(false)
+const currentBenefit = ref<MemberBenefitSummary | null>(null)
 
 const isExpired = (dateString?: string) => {
   if (!dateString) return true
@@ -172,6 +221,21 @@ const resetQuery = () => {
 const handleRenew = (row: MemberCard) => {
   currentCard.value = { ...row }
   renewVisible.value = true
+}
+
+const handleShowBenefits = async (row: MemberCard) => {
+  if (!row.memberId) return
+  benefitVisible.value = true
+  benefitLoading.value = true
+  currentBenefit.value = null
+  try {
+    currentBenefit.value = await getMemberBenefitSummary(row.memberId) as any
+  } catch (e) {
+    console.error('Benefit fetch error:', e)
+    ElMessage.error('权益摘要加载失败')
+  } finally {
+    benefitLoading.value = false
+  }
 }
 
 const handleReportLoss = (row: MemberCard) => {
@@ -259,4 +323,73 @@ onMounted(() => handleQuery())
   color: #475569;
 }
 :deep(.slate-pagination .btn-prev), :deep(.slate-pagination .btn-next) { background: transparent; }
+
+.benefit-drawer {
+  display: grid;
+  gap: 16px;
+}
+
+.benefit-hero {
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  background: #f8fafc;
+}
+
+.benefit-hero span,
+.benefit-section h3,
+.benefit-metrics span {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.benefit-hero h2 {
+  margin: 8px 0;
+  color: #0f172a;
+  font-size: 26px;
+}
+
+.benefit-hero p,
+.benefit-section p {
+  margin: 0;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.benefit-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.benefit-metrics article {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+}
+
+.benefit-metrics strong {
+  display: block;
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 20px;
+}
+
+.benefit-section {
+  border-top: 1px solid #e2e8f0;
+  padding-top: 14px;
+}
+
+.benefit-section h3 {
+  margin: 0 0 8px;
+}
+
+.benefit-section .accent {
+  color: #0f766e;
+  font-weight: 700;
+}
 </style>

@@ -26,6 +26,45 @@ export interface MemberCard {
     createTime?: string
 }
 
+export interface BenefitAsset {
+    equipmentId?: number
+    name?: string
+    categoryName?: string
+    location?: string
+    status?: number
+    statusDesc?: string
+    reason?: string
+}
+
+export interface BenefitArea {
+    areaId?: number
+    areaName?: string
+    location?: string
+    currentCount?: number
+    capacity?: number
+    occupancyPercent?: number
+    statusLabel?: string
+    action?: string
+}
+
+export interface MemberBenefitSummary {
+    memberId?: number
+    memberName?: string
+    walletBalance?: number
+    active?: boolean
+    statusLabel?: string
+    card?: MemberCard | null
+    daysLeft?: number
+    groupCourseQuota?: number
+    privateTrainingQuota?: number
+    unlimitedEntry?: boolean
+    lockerAccess?: boolean
+    entitlements?: string[]
+    actions?: string[]
+    availableAssets?: BenefitAsset[]
+    recommendedAreas?: BenefitArea[]
+}
+
 export interface CardBuyDto {
     memberId: number
     cardType: string
@@ -116,6 +155,13 @@ export function getMemberCardList(params: any) {
 export function getValidCard(memberId: number) {
     return request({
         url: `/member/card/valid/${memberId}`,
+        method: 'get'
+    })
+}
+
+export function getMemberBenefitSummary(memberId: number) {
+    return request({
+        url: `/member/card/benefits/${memberId}`,
         method: 'get'
     })
 }

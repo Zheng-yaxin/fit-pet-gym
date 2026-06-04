@@ -20,6 +20,7 @@ public class LocalSchemaInitializer {
         ensureMemberGrowthTable();
         ensureFeedbackColumns();
         ensureHealthIndexes();
+        ensureMemberBenefitIndexes();
     }
 
     private void ensureMemberGrowthTable() {
@@ -94,6 +95,12 @@ public class LocalSchemaInitializer {
         ensureIndex("gym_health_data", "idx_health_data_user_measure", "user_id, measure_time");
         ensureIndex("gym_diet_log", "idx_diet_log_user_date", "user_id, eat_date");
         ensureIndex("gym_diet_target", "idx_diet_target_user", "user_id");
+    }
+
+    private void ensureMemberBenefitIndexes() {
+        ensureIndex("gym_member_card", "idx_member_card_benefit_lookup", "member_id, status, deleted, expire_date");
+        ensureIndex("gym_equipment", "idx_equipment_status_location", "status, location");
+        ensureIndex("gym_traffic_snapshot", "idx_traffic_snapshot_area_time", "area_id, snapshot_time");
     }
 
     private void ensureIndex(String tableName, String indexName, String columnName) {

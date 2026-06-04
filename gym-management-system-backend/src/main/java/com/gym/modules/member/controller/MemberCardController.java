@@ -6,6 +6,7 @@ import com.gym.common.result.PageResult;
 import com.gym.common.result.R;
 import com.gym.modules.member.domain.dto.CardBuyDto;
 import com.gym.modules.member.domain.entity.MemberCard;
+import com.gym.modules.member.domain.vo.MemberBenefitSummaryVo;
 import com.gym.modules.member.service.IMemberCardService;
 import com.gym.modules.member.service.IMemberService;
 import com.gym.modules.auth.domain.entity.Member;
@@ -98,5 +99,11 @@ public class MemberCardController {
     @Operation(summary = "查询有效会员卡")
     public R<MemberCard> getValidCard(@PathVariable("memberId") Long memberId) {
         return R.ok(memberCardService.getValidCardByMemberId(memberId));
+    }
+
+    @GetMapping("/benefits/{memberId}")
+    @Operation(summary = "Query member benefits and venue asset access")
+    public R<MemberBenefitSummaryVo> getBenefitSummary(@PathVariable("memberId") Long memberId) {
+        return R.ok(memberCardService.getBenefitSummary(memberId));
     }
 }

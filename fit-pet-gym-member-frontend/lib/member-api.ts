@@ -369,6 +369,45 @@ export type MemberCard = {
   status?: string;
 };
 
+export type BenefitAsset = {
+  equipmentId?: number;
+  name?: string;
+  categoryName?: string;
+  location?: string;
+  status?: number;
+  statusDesc?: string;
+  reason?: string;
+};
+
+export type BenefitArea = {
+  areaId?: number;
+  areaName?: string;
+  location?: string;
+  currentCount?: number;
+  capacity?: number;
+  occupancyPercent?: number;
+  statusLabel?: string;
+  action?: string;
+};
+
+export type MemberBenefitSummary = {
+  memberId?: number;
+  memberName?: string;
+  walletBalance?: number;
+  active?: boolean;
+  statusLabel?: string;
+  card?: MemberCard | null;
+  daysLeft?: number;
+  groupCourseQuota?: number;
+  privateTrainingQuota?: number;
+  unlimitedEntry?: boolean;
+  lockerAccess?: boolean;
+  entitlements?: string[];
+  actions?: string[];
+  availableAssets?: BenefitAsset[];
+  recommendedAreas?: BenefitArea[];
+};
+
 export type WalletBalance = {
   memberId?: number;
   balance?: number;
@@ -679,6 +718,10 @@ export function getTrafficRecommendations(goal = "", limit = 5) {
 
 export function getValidMemberCard(memberId: number) {
   return apiRequest<MemberCard | null>(`/member/card/valid/${memberId}`);
+}
+
+export function getMemberBenefitSummary(memberId: number) {
+  return apiRequest<MemberBenefitSummary>(`/member/card/benefits/${memberId}`);
 }
 
 export function getWalletBalance(memberId: number) {

@@ -1,22 +1,37 @@
 package com.gym.modules.member.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.gym.common.exception.ServiceException;
 import com.gym.modules.auth.domain.entity.Member;
+import com.gym.modules.equipment.domain.dto.EquipmentQueryDTO;
+import com.gym.modules.equipment.domain.vo.EquipmentVO;
+import com.gym.modules.equipment.service.EquipmentService;
 import com.gym.modules.member.domain.dto.CardBuyDto;
 import com.gym.modules.member.domain.entity.MemberCard;
 import com.gym.modules.member.domain.entity.MemberTransaction;
+import com.gym.modules.member.domain.vo.MemberBenefitSummaryVo;
 import com.gym.modules.member.mapper.MemberCardMapper;
 import com.gym.modules.member.mapper.MemberMapper;
 import com.gym.modules.member.mapper.MemberTransactionMapper;
 import com.gym.modules.member.service.IMemberCardService;
+import com.gym.modules.traffic.domain.entity.GymArea;
+import com.gym.modules.traffic.domain.entity.TrafficSnapshot;
+import com.gym.modules.traffic.service.IGymAreaService;
+import com.gym.modules.traffic.service.ITrafficSnapshotService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Service
 public class MemberCardServiceImpl extends ServiceImpl<MemberCardMapper, MemberCard> implements IMemberCardService {
@@ -25,6 +40,12 @@ public class MemberCardServiceImpl extends ServiceImpl<MemberCardMapper, MemberC
     private MemberMapper memberMapper;
     @Autowired
     private MemberTransactionMapper transactionMapper;
+    @Autowired
+    private EquipmentService equipmentService;
+    @Autowired
+    private ITrafficSnapshotService trafficSnapshotService;
+    @Autowired
+    private IGymAreaService gymAreaService;
 
     @Override
     @Transactional
@@ -204,6 +225,170 @@ Calendar calendar = Calendar.getInstance();
                 .gt(MemberCard::getExpireDate, new Date())
                 .orderByDesc(MemberCard::getExpireDate)
                 .last("limit 1"));
+    }
+
+    @Override
+    public MemberBenefitSummaryVo getBenefitSummary(Long memberId) {
+        Member member = memberMapper.selectById(memberId);
+        if (member == null || Integer.valueOf(1).equals(member.getDeleted())) {
+            throw new ServiceException("会员不存在");
+        }
+
+        MemberCard card = getValidCardByMemberId(memberId);
+        MemberBenefitSummaryVo vo = new MemberBenefitSummaryVo();
+        vo.setMemberId(memberId);
+        vo.setMemberName(member.getName());
+        vo.setWalletBalance(member.getBalance() == null ? BigDecimal.ZERO : member.getBalance());
+        vo.setCard(card);
+        vo.setActive(card != null);
+
+        if (card == null) {
+            vo.setStatusLabel("暂无有效会员卡");
+            vo.setGroupCourseQuota(0);
+            vo.setPrivateTrainingQuota(0);
+            vo.setUnlimitedEntry(false);
+            vo.setLockerAccess(false);
+            vo.getActions().add("先购买或续费会员卡，再预约高价值场馆资产。");
+            vo.getActions().add("如果准备购卡，请先确认钱包余额充足。");
+        } else {
+            applyBenefitRules(vo, card);
+        }
+
+        vo.setAvailableAssets(buildAvailableAssets());
+        vo.setRecommendedAreas(buildRecommendedAreas());
+        if (vo.getAvailableAssets().isEmpty()) {
+            vo.getActions().add("当前没有可用器材记录，到店前请让前台确认。");
+        }
+        if (vo.getRecommendedAreas().isEmpty()) {
+            vo.getActions().add("场馆暂无实时人流快照，请以现场区域状态为准。");
+        }
+        return vo;
+    }
+
+    private void applyBenefitRules(MemberBenefitSummaryVo vo, MemberCard card) {
+        int daysLeft = card.getExpireDate() == null ? 0 : Math.max(0,
+                (int) ChronoUnit.DAYS.between(new Date().toInstant(), card.getExpireDate().toInstant()));
+        String cardType = card.getCardType() == null ? "" : card.getCardType();
+        vo.setDaysLeft(daysLeft);
+        vo.setStatusLabel(daysLeft <= 7 ? "即将到期" : "权益有效");
+        vo.setUnlimitedEntry(!containsAny(cardType, "次", "娆"));
+        vo.setLockerAccess(containsAny(cardType, "年", "骞"));
+
+        if (containsAny(cardType, "年", "骞")) {
+            vo.setGroupCourseQuota(999);
+            vo.setPrivateTrainingQuota(12);
+            vo.getEntitlements().add("年卡权益：全年入场与团课预约。");
+            vo.getEntitlements().add("包含 12 节私教课程和储物柜权益。");
+        } else if (containsAny(cardType, "月", "鏈")) {
+            vo.setGroupCourseQuota(999);
+            vo.setPrivateTrainingQuota(2);
+            vo.getEntitlements().add("月卡权益：本周期入场与团课预约。");
+            vo.getEntitlements().add("包含 2 节私教课程。");
+        } else if (containsAny(cardType, "周", "鍛")) {
+            vo.setGroupCourseQuota(7);
+            vo.setPrivateTrainingQuota(1);
+            vo.getEntitlements().add("周卡权益：7 天入场与团课预约。");
+            vo.getEntitlements().add("包含 1 节私教体验课。");
+        } else if (containsAny(cardType, "日", "鏃")) {
+            vo.setGroupCourseQuota(1);
+            vo.setPrivateTrainingQuota(0);
+            vo.getEntitlements().add("日卡权益：当天入场与基础器材使用。");
+        } else if (containsAny(cardType, "次", "娆")) {
+            int times = card.getRemainingTimes() == null ? 0 : card.getRemainingTimes();
+            vo.setGroupCourseQuota(Math.max(0, times));
+            vo.setPrivateTrainingQuota(0);
+            vo.getEntitlements().add("次卡权益：按剩余次数入场和预约。");
+        } else {
+            vo.setGroupCourseQuota(1);
+            vo.setPrivateTrainingQuota(0);
+            vo.getEntitlements().add("标准权益：入场和基础器材使用。");
+        }
+
+        if (daysLeft <= 7) {
+            vo.getActions().add("会员卡即将到期，请尽快续费以保持入场权益。");
+        }
+        if (Boolean.TRUE.equals(vo.getLockerAccess())) {
+            vo.getActions().add("储物柜权益已激活，可到前台绑定柜号。");
+        }
+    }
+
+    private List<MemberBenefitSummaryVo.BenefitAssetVo> buildAvailableAssets() {
+        EquipmentQueryDTO query = new EquipmentQueryDTO();
+        query.setPageNum(1);
+        query.setPageSize(8);
+        query.setStatus(0);
+        Page<EquipmentVO> page = equipmentService.memberOptions(query);
+        return page.getRecords().stream().map(item -> {
+            MemberBenefitSummaryVo.BenefitAssetVo vo = new MemberBenefitSummaryVo.BenefitAssetVo();
+            vo.setEquipmentId(item.getId());
+            vo.setName(item.getName());
+            vo.setCategoryName(item.getCategoryName());
+            vo.setLocation(item.getLocation());
+            vo.setStatus(item.getStatus());
+            vo.setStatusDesc(item.getStatusDesc());
+            vo.setReason("当前会员权益可使用的场馆器材。");
+            return vo;
+        }).toList();
+    }
+
+    private List<MemberBenefitSummaryVo.BenefitAreaVo> buildRecommendedAreas() {
+        List<TrafficSnapshot> snapshots = trafficSnapshotService.list(new LambdaQueryWrapper<TrafficSnapshot>()
+                .orderByDesc(TrafficSnapshot::getSnapshotTime)
+                .last("limit 120"));
+        Map<Long, TrafficSnapshot> latestByArea = new LinkedHashMap<>();
+        for (TrafficSnapshot snapshot : snapshots) {
+            if (snapshot.getAreaId() != null && !latestByArea.containsKey(snapshot.getAreaId())) {
+                latestByArea.put(snapshot.getAreaId(), snapshot);
+            }
+        }
+
+        Map<Long, GymArea> areas = gymAreaService.list().stream()
+                .collect(Collectors.toMap(GymArea::getId, area -> area, (a, b) -> a, LinkedHashMap::new));
+        return areas.values().stream()
+                .map(area -> toBenefitArea(area, latestByArea.get(area.getId())))
+                .sorted((a, b) -> Integer.compare(nullToZero(a.getOccupancyPercent()), nullToZero(b.getOccupancyPercent())))
+                .limit(4)
+                .toList();
+    }
+
+    private MemberBenefitSummaryVo.BenefitAreaVo toBenefitArea(GymArea area, TrafficSnapshot snapshot) {
+        int capacity = firstPositive(snapshot == null ? null : snapshot.getCapacity(), area.getCapacity(), 30);
+        int currentCount = Math.max(0, snapshot == null || snapshot.getCurrentCount() == null ? 0 : snapshot.getCurrentCount());
+        int occupancy = capacity <= 0 ? 0 : Math.min(100, currentCount * 100 / capacity);
+
+        MemberBenefitSummaryVo.BenefitAreaVo vo = new MemberBenefitSummaryVo.BenefitAreaVo();
+        vo.setAreaId(area.getId());
+        vo.setAreaName(area.getName());
+        vo.setLocation(area.getLocation());
+        vo.setCapacity(capacity);
+        vo.setCurrentCount(currentCount);
+        vo.setOccupancyPercent(occupancy);
+        vo.setStatusLabel(occupancy >= 80 ? "拥挤" : occupancy >= 55 ? "偏忙" : occupancy >= 25 ? "舒适" : "空闲");
+        vo.setAction(occupancy >= 80 ? "建议延后或选择其他场区。" : "适合作为下一组训练区域。");
+        return vo;
+    }
+
+    private boolean containsAny(String value, String... needles) {
+        for (String needle : needles) {
+            if (value.contains(needle)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int firstPositive(Integer first, Integer second, int fallback) {
+        if (first != null && first > 0) {
+            return first;
+        }
+        if (second != null && second > 0) {
+            return second;
+        }
+        return fallback;
+    }
+
+    private int nullToZero(Integer value) {
+        return value == null ? 0 : value;
     }
 
     private String generateCardNo() {
