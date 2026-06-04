@@ -53,6 +53,9 @@ public class AdminFeedbackController {
         data.put("handledTotal", list.stream()
                 .filter(item -> "handled".equals(item.getHandleStatus()))
                 .count());
+        data.put("followUpTotal", list.stream()
+                .filter(item -> item.getFollowUpRequired() != null && item.getFollowUpRequired() == 1)
+                .count());
         return R.ok(data);
     }
 

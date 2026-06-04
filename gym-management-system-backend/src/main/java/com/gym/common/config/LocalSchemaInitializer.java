@@ -86,6 +86,7 @@ public class LocalSchemaInitializer {
         ensureIndex("gym_course_feedback", "idx_course_feedback_booking_id", "booking_id");
         ensureIndex("gym_course_feedback", "idx_course_feedback_type", "feedback_type");
         ensureIndex("gym_course_feedback", "idx_course_feedback_handle_status", "handle_status");
+        ensureIndex("gym_course_feedback", "idx_course_feedback_followup_chat", "member_id, coach_id, follow_up_required");
     }
 
     private void ensureIndex(String tableName, String indexName, String columnName) {

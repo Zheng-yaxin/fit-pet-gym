@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import { ArrowLeft, CalendarCheck, UserRound } from "lucide-react";
+import { ArrowLeft, CalendarCheck, MessageCircle, UserRound } from "lucide-react";
 import { FeatureMotionDirector } from "@/components/motion/feature-motion-director";
 import { FeatureStatusCard } from "@/components/motion/feature-status-card";
 import {
@@ -381,7 +381,17 @@ export default function CoursesPage() {
                   <h3>{item.feedbackType === "personal_training" ? "PT feedback" : "Course feedback"} / {item.handleStatus === "handled" ? "Handled" : item.followUpRequired ? "Follow up" : "Pending"}</h3>
                   <p>{item.adminReply || item.content || "Waiting for the coach desk to review this feedback."}</p>
                 </div>
-                <strong>{item.rating ?? "--"}/5</strong>
+                {item.followUpRequired && item.coachId ? (
+                  <Link
+                    className="feature-link-button"
+                    href={`/chat?targetId=${encodeURIComponent(String(item.coachId))}&role=COACH&targetName=${encodeURIComponent("Coach")}`}
+                  >
+                    <MessageCircle size={16} />
+                    Chat
+                  </Link>
+                ) : (
+                  <strong>{item.rating ?? "--"}/5</strong>
+                )}
               </div>
             ))}
             {!feedbackHistory.length ? <p>No submitted feedback yet.</p> : null}

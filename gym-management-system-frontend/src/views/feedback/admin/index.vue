@@ -33,6 +33,10 @@
         <p>Handled</p>
         <strong>{{ stats.handledTotal || 0 }}</strong>
       </el-card>
+      <el-card shadow="never">
+        <p>Follow-up chat</p>
+        <strong>{{ stats.followUpTotal || 0 }}</strong>
+      </el-card>
     </div>
 
     <el-table :data="list" class="table" border>
@@ -90,6 +94,7 @@
         </el-form-item>
         <el-form-item label="Follow up">
           <el-switch v-model="followUpSwitch" />
+          <p class="form-hint">When enabled, the member and assigned coach can open a real chat thread from this feedback.</p>
         </el-form-item>
         <el-form-item label="Admin reply">
           <el-input
@@ -163,11 +168,12 @@ onMounted(loadData)
 header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 header p { margin: 0 0 6px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; }
 h1 { margin: 0; color: #1f2937; font-size: 24px; }
-.stats { display: grid; grid-template-columns: repeat(6, minmax(120px, 1fr)); gap: 16px; margin-bottom: 20px; max-width: 1180px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; margin-bottom: 20px; max-width: 1180px; }
 .stats p { margin: 0 0 8px; color: #64748b; }
 .stats strong { font-size: 30px; color: #0f172a; }
 .table { border-radius: 8px; overflow: hidden; }
 .muted-row { margin: 4px 0 0; color: #94a3b8; font-size: 12px; }
+.form-hint { margin: 8px 0 0; color: #94a3b8; font-size: 12px; line-height: 1.5; }
 .full { width: 100%; }
 @media (max-width: 980px) {
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }

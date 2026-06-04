@@ -16,6 +16,8 @@ import com.gym.modules.coach.domain.entity.Coach;
 import com.gym.modules.coach.domain.entity.PersonalTrainingBooking;
 import com.gym.modules.coach.service.ICoachService;
 import com.gym.modules.coach.service.IPersonalTrainingBookingService;
+import com.gym.modules.feedback.domain.entity.CourseFeedback;
+import com.gym.modules.feedback.mapper.CourseFeedbackMapper;
 import com.gym.modules.member.service.IMemberService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.BeanUtils;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,6 +48,9 @@ public class ChatServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
     @Resource
     private ChatSessionRegistry chatSessionRegistry;
 
+    @Resource
+    private CourseFeedbackMapper feedbackMapper;
+
     private String getCurrentUserRole() {
         try {
             return SecurityUtils.getLoginUser().getUserType().getCode();
@@ -64,7 +70,8 @@ public class ChatServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
             query.eq(PersonalTrainingBooking::getMemberId, userId);
             Set<Long> contactIds = bookingService.list(query).stream()
                     .map(PersonalTrainingBooking::getCoachId)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(HashSet::new));
+            contactIds.addAll(listFeedbackFollowUpCoachIds(userId));
             if (!contactIds.isEmpty()) {
                 contacts = coachService.listByIds(contactIds).stream().map(coach -> {
                     ChatContactVo vo = new ChatContactVo();
@@ -81,7 +88,8 @@ public class ChatServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
             query.eq(PersonalTrainingBooking::getCoachId, userId);
             Set<Long> contactIds = bookingService.list(query).stream()
                     .map(PersonalTrainingBooking::getMemberId)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toCollection(HashSet::new));
+            contactIds.addAll(listFeedbackFollowUpMemberIds(userId));
             if (!contactIds.isEmpty()) {
                 contacts = memberService.listByIds(contactIds).stream().map(member -> {
                     ChatContactVo vo = new ChatContactVo();
@@ -96,6 +104,28 @@ public class ChatServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
             }
         }
         return contacts;
+    }
+
+    private Set<Long> listFeedbackFollowUpCoachIds(Long memberId) {
+        return feedbackMapper.selectList(new LambdaQueryWrapper<CourseFeedback>()
+                        .eq(CourseFeedback::getMemberId, memberId)
+                        .eq(CourseFeedback::getFollowUpRequired, 1)
+                        .eq(CourseFeedback::getDeleted, 0)
+                        .isNotNull(CourseFeedback::getCoachId))
+                .stream()
+                .map(CourseFeedback::getCoachId)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Long> listFeedbackFollowUpMemberIds(Long coachId) {
+        return feedbackMapper.selectList(new LambdaQueryWrapper<CourseFeedback>()
+                        .eq(CourseFeedback::getCoachId, coachId)
+                        .eq(CourseFeedback::getFollowUpRequired, 1)
+                        .eq(CourseFeedback::getDeleted, 0)
+                        .isNotNull(CourseFeedback::getMemberId))
+                .stream()
+                .map(CourseFeedback::getMemberId)
+                .collect(Collectors.toSet());
     }
 
     private Long countUnread(Long senderId, String senderRole, Long receiverId, String receiverRole) {
@@ -165,9 +195,29 @@ public class ChatServiceImpl extends ServiceImpl<ChatMessageMapper, ChatMessage>
             throw new ServiceException("不支持的聊天关系");
         }
 
-        if (bookingService.count(query) == 0) {
+        if (bookingService.count(query) > 0) {
+            return;
+        }
+
+        if (!hasFeedbackFollowUpRelationship(senderId, senderRole, receiverId, receiverRole)) {
             throw new ServiceException("无预约关系，无法发起聊天");
         }
+    }
+
+    private boolean hasFeedbackFollowUpRelationship(Long senderId, String senderRole, Long receiverId, String receiverRole) {
+        LambdaQueryWrapper<CourseFeedback> query = new LambdaQueryWrapper<CourseFeedback>()
+                .eq(CourseFeedback::getFollowUpRequired, 1)
+                .eq(CourseFeedback::getDeleted, 0);
+        if ("MEMBER".equals(senderRole) && "COACH".equals(receiverRole)) {
+            query.eq(CourseFeedback::getMemberId, senderId)
+                    .eq(CourseFeedback::getCoachId, receiverId);
+        } else if ("COACH".equals(senderRole) && "MEMBER".equals(receiverRole)) {
+            query.eq(CourseFeedback::getCoachId, senderId)
+                    .eq(CourseFeedback::getMemberId, receiverId);
+        } else {
+            return false;
+        }
+        return feedbackMapper.selectCount(query) > 0;
     }
 
     @Override
