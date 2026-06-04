@@ -29,8 +29,7 @@ public class CourseFeedbackController {
     @PostMapping
     @Operation(summary = "提交课后反馈")
     public R<Void> submit(@RequestBody CourseFeedback feedback) {
-        feedback.setMemberId(SecurityUtils.getUserId());
-        return feedbackService.save(feedback) ? R.ok() : R.fail("提交反馈失败");
+        return feedbackService.submitMemberFeedback(SecurityUtils.getUserId(), feedback) ? R.ok() : R.fail("提交反馈失败");
     }
 
     @GetMapping("/mine")

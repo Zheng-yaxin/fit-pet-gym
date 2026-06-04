@@ -1,0 +1,48 @@
+:root {
+  color-scheme: dark;
+  --ff-canvas: #0b0c0a;
+  --ff-surface: #151713;
+  --ff-surface-raised: #20231d;
+  --ff-surface-muted: #292d25;
+  --ff-border: #343a30;
+  --ff-border-strong: #4a5244;
+  --ff-text: #f3f1e8;
+  --ff-text-secondary: #a7a99e;
+  --ff-text-muted: #71766c;
+  --ff-accent-power: #b8ff2c;
+  --ff-accent-power-soft: rgba(184, 255, 44, 0.1);
+  --ff-accent-heat: #ff6a1a;
+  --ff-accent-heat-soft: rgba(255, 106, 26, 0.12);
+  --ff-accent-cool: #31d8c8;
+  --ff-accent-cool-soft: rgba(49, 216, 200, 0.1);
+  --ff-success: #6eeb83;
+  --ff-warning: #f6c945;
+  --ff-danger: #ff3b30;
+  --ff-danger-soft: rgba(255, 59, 48, 0.12);
+  --ff-shadow-panel: 0 24px 80px rgba(0, 0, 0, 0.42);
+  --ff-radius-control: 6px;
+  --ff-radius-panel: 8px;
+  --ff-radius-large: 10px;
+  --ff-font-ui: "Alibaba PuHuiTi", "HarmonyOS Sans SC", "Source Han Sans SC", "Microsoft YaHei UI", sans-serif;
+  --ff-font-metric: "Bahnschrift", "DIN Alternate", "Rajdhani", "Arial Narrow", sans-serif;
+
+  --system-blue: var(--ff-accent-power);
+  --system-blue-hover: #d4ff72;
+  --system-red: var(--ff-danger);
+  --system-green: var(--ff-success);
+  --system-orange: var(--ff-accent-heat);
+  --system-gray: var(--ff-text-muted);
+  --bg-primary: var(--ff-canvas);
+  --bg-secondary: var(--ff-surface);
+  --bg-tertiary: var(--ff-surface-raised);
+  --glass-bg-rgb: 21, 23, 19;
+  --glass-border: var(--ff-border);
+  --text-primary: var(--ff-text);
+  --text-secondary: var(--ff-text-secondary);
+  --text-tertiary: var(--ff-text-muted);
+  --radius-s: var(--ff-radius-control);
+  --radius-m: var(--ff-radius-panel);
+  --radius-l: var(--ff-radius-large);
+  --radius-full: 999px;
+}
+

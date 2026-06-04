@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.modules.equipment.mapper.RepairLogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gym.modules.equipment.domain.entity.RepairLog">
+        <id column="id" property="id"/>
+        <result column="equipment_id" property="equipmentId"/>
+        <result column="reporter_id" property="reporterId"/>
+        <result column="report_time" property="reportTime"/>
+        <result column="fault_desc" property="faultDesc"/>
+        <result column="repairer_id" property="repairerId"/>
+        <result column="status" property="status"/>
+        <result column="repair_time" property="repairTime"/>
+        <result column="cost" property="cost"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <!-- 分页查询报修记录（关联器材名称） -->
+    <resultMap id="RepairLogVOResultMap" type="com.gym.modules.equipment.domain.vo.RepairLogVO">
+        <id column="id" property="id"/>
+        <result column="equipment_id" property="equipmentId"/>
+        <result column="equipment_name" property="equipmentName"/>
+        <result column="reporter_id" property="repairBy"/>
+        <result column="report_time" property="repairTime"/>
+        <result column="fault_desc" property="faultDesc"/>
+        <result column="status" property="status"/>
+        <result column="repairer_id" property="handleBy"/>
+        <result column="repair_time" property="finishTime"/>
+        <result column="cost" property="cost"/>
+        <result column="remark" property="repairRemark"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectPageWithRelations" resultMap="RepairLogVOResultMap">
+        SELECT r.*, e.name AS equipment_name
+        FROM gym_repair_log r
+        LEFT JOIN gym_equipment e ON r.equipment_id = e.id AND e.deleted = 0
+        WHERE r.deleted = 0
+        <if test="equipmentId != null and equipmentId != ''">
+            AND r.equipment_id = #{equipmentId}
+        </if>
+        <if test="reporterId != null and reporterId != ''">
+            AND r.reporter_id = #{reporterId}
+        </if>
+        <if test="status != null and status != ''">
+            AND r.status = #{status}
+        </if>
+        <!-- 修复第75行：用CDATA包裹特殊字符（核心修复） -->
+        <if test="startTime != null and startTime != ''">
+            <![CDATA[ AND r.report_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ AND r.report_time <= #{endTime} ]]>
+        </if>
+        ORDER BY r.create_time DESC
+    </select>
+
+</mapper>

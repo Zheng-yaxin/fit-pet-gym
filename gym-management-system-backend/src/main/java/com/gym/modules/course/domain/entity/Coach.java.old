@@ -1,0 +1,31 @@
+// gym-management-system-backend/src/main/java/com/gym/modules/course/domain/entity/Coach.java
+package com.gym.modules.course.domain.entity;
+
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+
+import java.util.Date;
+
+@Data
+@TableName("gym_coach")
+public class Coach {
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
+    private String name;
+    private String phone;
+    private String password; // 登录密码
+    private String specialty; // 专长
+    private String introduction;
+    private String avatar;
+    private String status; // 0-正常, 1-停用
+
+    @TableField(fill = FieldFill.INSERT)
+    private Date createTime;
+
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private Date updateTime;
+
+    @TableLogic
+    private Integer deleted;
+}

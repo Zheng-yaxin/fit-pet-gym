@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.modules.health.mapper.HealthDataMapper">
+
+    <resultMap id="BaseResultMap" type="com.gym.modules.health.domain.entity.HealthData">
+        <id column="id" property="id" />
+        <result column="user_id" property="userId" />
+        <result column="gender" property="gender" />
+        <result column="birth_date" property="birthDate" />
+        <result column="height" property="height" />
+        <result column="weight" property="weight" />
+        <result column="bmi" property="bmi" />
+        <result column="body_fat_rate" property="bodyFatRate" />
+        <result column="measure_time" property="measureTime" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, user_id, gender, birth_date, height, weight, bmi, body_fat_rate, measure_time, create_time, update_time, deleted
+    </sql>
+
+</mapper>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.modules.health.mapper.FoodMapper">
+
+    <resultMap id="BaseResultMap" type="com.gym.modules.health.domain.entity.Food">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="calories" property="calories" />
+        <result column="protein" property="protein" />
+        <result column="fat" property="fat" />
+        <result column="carbohydrate" property="carbohydrate" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, calories, protein, fat, carbohydrate
+    </sql>
+
+</mapper>

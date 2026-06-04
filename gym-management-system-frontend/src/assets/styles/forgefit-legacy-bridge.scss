@@ -1,0 +1,176 @@
+.forgefit-app-shell :is([class*="bg-slate-"], [class*="bg-gray-"], [class*="bg-zinc-"], [class*="bg-neutral-"], [class*="bg-stone-"], [class*="bg-white"]) {
+  background-color: var(--ff-surface) !important;
+}
+
+.forgefit-app-shell :is([class*="glass"], [class*="liquid"], [class*="clean"]) {
+  color: var(--ff-text) !important;
+  border-color: var(--ff-border) !important;
+  background-color: var(--ff-surface) !important;
+  letter-spacing: 0 !important;
+}
+
+.forgefit-app-shell :is([class*="glass-title"], [class*="liquid-title"], [class*="clean-title"]) {
+  color: var(--ff-text) !important;
+}
+
+.forgefit-app-shell :is([class*="glass-subtitle"], [class*="liquid-subtitle"], [class*="clean-subtitle"]) {
+  color: var(--ff-text-secondary) !important;
+}
+
+.forgefit-app-shell :is([class*="liquid-btn"], [class*="glass-btn"], [class*="clean-btn"]) {
+  min-height: 44px !important;
+  border: 1px solid rgba(184, 255, 44, 0.42) !important;
+  border-radius: 8px !important;
+  color: #10120d !important;
+  background: var(--ff-accent-power) !important;
+  font-weight: 900 !important;
+}
+
+.forgefit-app-shell :is([class*="bg-blue-"], [class*="bg-sky-"], [class*="bg-cyan-"], [class*="bg-teal-"], [class*="bg-indigo-"], [class*="bg-purple-"]) {
+  background-color: var(--ff-accent-cool-soft) !important;
+}
+
+.forgefit-app-shell :is([class*="bg-emerald-"], [class*="bg-green-"], [class*="bg-lime-"]) {
+  background-color: var(--ff-accent-power-soft) !important;
+}
+
+.forgefit-app-shell :is([class*="bg-orange-"], [class*="bg-amber-"], [class*="bg-yellow-"]) {
+  background-color: var(--ff-accent-heat-soft) !important;
+}
+
+.forgefit-app-shell :is([class*="bg-red-"], [class*="bg-rose-"], [class*="bg-pink-"]) {
+  background-color: var(--ff-danger-soft) !important;
+}
+
+.forgefit-app-shell :is([class*="text-slate-"], [class*="text-gray-"], [class*="text-zinc-"], [class*="text-neutral-"], [class*="text-stone-"]) {
+  color: var(--ff-text-secondary) !important;
+}
+
+.forgefit-app-shell :is([class*="text-white"], [class*="text-black"]) {
+  color: var(--ff-text) !important;
+}
+
+.forgefit-app-shell :is([class*="text-blue-"], [class*="text-sky-"], [class*="text-cyan-"], [class*="text-teal-"], [class*="text-indigo-"], [class*="text-purple-"]) {
+  color: var(--ff-accent-cool) !important;
+}
+
+.forgefit-app-shell :is([class*="text-emerald-"], [class*="text-green-"], [class*="text-lime-"]) {
+  color: var(--ff-accent-power) !important;
+}
+
+.forgefit-app-shell :is([class*="text-orange-"], [class*="text-amber-"], [class*="text-yellow-"]) {
+  color: var(--ff-accent-heat) !important;
+}
+
+.forgefit-app-shell :is([class*="text-red-"], [class*="text-rose-"], [class*="text-pink-"]) {
+  color: var(--ff-danger) !important;
+}
+
+.forgefit-app-shell :is([class*="border-slate-"], [class*="border-gray-"], [class*="border-zinc-"], [class*="border-neutral-"], [class*="border-stone-"], [class*="border-white"]) {
+  border-color: var(--ff-border) !important;
+}
+
+.forgefit-app-shell :is([class*="border-blue-"], [class*="border-sky-"], [class*="border-cyan-"], [class*="border-teal-"], [class*="border-indigo-"], [class*="border-purple-"]) {
+  border-color: rgba(49, 216, 200, 0.34) !important;
+}
+
+.forgefit-app-shell :is([class*="border-emerald-"], [class*="border-green-"], [class*="border-lime-"]) {
+  border-color: rgba(184, 255, 44, 0.34) !important;
+}
+
+.forgefit-app-shell :is([class*="border-orange-"], [class*="border-amber-"], [class*="border-yellow-"]) {
+  border-color: rgba(255, 106, 26, 0.4) !important;
+}
+
+.forgefit-app-shell :is([class*="border-red-"], [class*="border-rose-"], [class*="border-pink-"]) {
+  border-color: rgba(255, 59, 48, 0.4) !important;
+}
+
+.forgefit-app-shell :is([class*="ring-slate-"], [class*="ring-gray-"], [class*="ring-white"], [class*="shadow-slate-"], [class*="shadow-gray-"]) {
+  --tw-ring-color: var(--ff-border) !important;
+  box-shadow: var(--ff-shadow-panel) !important;
+}
+
+.forgefit-app-shell :is([class*="rounded-xl"], [class*="rounded-2xl"], [class*="rounded-3xl"], [class*="rounded-["]) {
+  border-radius: 8px !important;
+}
+
+.forgefit-app-shell :is(
+  .fixed,
+  .sticky,
+  header,
+  aside,
+  nav,
+  [class*="header"],
+  [class*="sidebar"],
+  [class*="toolbar"],
+  [class*="topbar"],
+  [class*="navbar"]
+) {
+  border-color: var(--ff-border) !important;
+}
+
+.forgefit-app-shell :is(.page, [class*="page"], [class*="container"], [class*="screen"], [class*="view"]) {
+  color: var(--ff-text) !important;
+  background-color: transparent !important;
+  background-image:
+    radial-gradient(circle at 18% 4%, rgba(184, 255, 44, 0.08), transparent 26%),
+    radial-gradient(circle at 88% 12%, rgba(255, 106, 26, 0.07), transparent 28%);
+}
+
+.forgefit-app-shell :is(.eyebrow, .summary, .description, .caption, .subtext, [class*="subtitle"], [class*="desc"], header p) {
+  color: var(--ff-text-secondary) !important;
+}
+
+.forgefit-app-shell :is(.title, [class*="title"], h1, h2, h3, h4) {
+  color: var(--ff-text) !important;
+  letter-spacing: 0 !important;
+}
+
+.forgefit-app-shell :is(.divider, .divider-vertical, .stat-divider, .handle-bar, [class*="divider"], [class*="separator"]) {
+  background: var(--ff-border) !important;
+}
+
+.forgefit-app-shell :is([class*="spinner"], .el-loading-spinner) {
+  border-color: rgba(243, 241, 232, 0.18) !important;
+  border-top-color: var(--ff-accent-power) !important;
+}
+
+.forgefit-app-shell :is(.el-card, [class*="card"], [class*="panel"], [class*="sheet"], [class*="modal"], [class*="drawer"]) :is(.el-card, [class*="card"], [class*="panel"]) {
+  box-shadow: none !important;
+}
+
+.forgefit-app-shell :is(.el-table__body-wrapper, .el-scrollbar__view, .custom-scrollbar) {
+  scrollbar-color: var(--ff-border-strong) transparent;
+}
+
+.forgefit-app-shell :is(.chat-page, [class*="chat"], [class*="message"]) {
+  --chat-self-bg: linear-gradient(135deg, rgba(184, 255, 44, 0.92), rgba(49, 216, 200, 0.86));
+  --chat-peer-bg: rgba(32, 35, 29, 0.9);
+}
+
+.forgefit-app-shell :is(.message-bubble, [class*="bubble"]) {
+  border-radius: 8px !important;
+}
+
+.forgefit-app-shell :is(.el-empty, .empty-state, [class*="empty"]) {
+  min-height: 140px;
+  color: var(--ff-text-muted) !important;
+  border: 1px dashed var(--ff-border) !important;
+  border-radius: 8px !important;
+  background: rgba(21, 23, 19, 0.62) !important;
+}
+
+.forgefit-app-shell :is(.el-skeleton__item, [class*="skeleton"], [class*="loading"]) {
+  background: linear-gradient(90deg, rgba(243, 241, 232, 0.06), rgba(184, 255, 44, 0.12), rgba(243, 241, 232, 0.06)) !important;
+}
+
+@media (max-width: 900px) {
+  .forgefit-app-shell :is(.el-drawer, [class*="drawer"], [class*="sheet"], [class*="modal"]) {
+    border-radius: 10px 10px 0 0 !important;
+  }
+
+  .forgefit-app-shell :is(button, a, .el-button, input, textarea, select, .el-input__wrapper, .el-select__wrapper) {
+    min-height: 44px !important;
+  }
+}

@@ -1,0 +1,77 @@
+:root {
+  --el-color-primary: var(--ff-accent-power);
+  --el-color-primary-light-3: #d4ff72;
+  --el-color-primary-light-5: rgba(184, 255, 44, 0.28);
+  --el-color-primary-light-7: rgba(184, 255, 44, 0.16);
+  --el-color-primary-light-8: rgba(184, 255, 44, 0.1);
+  --el-color-primary-light-9: rgba(184, 255, 44, 0.06);
+  --el-color-primary-dark-2: #8fce20;
+  --el-color-success: var(--ff-success);
+  --el-color-warning: var(--ff-warning);
+  --el-color-danger: var(--ff-danger);
+  --el-color-info: var(--ff-accent-cool);
+  --el-bg-color: var(--ff-surface);
+  --el-bg-color-page: var(--ff-canvas);
+  --el-bg-color-overlay: #151913;
+  --el-fill-color: var(--ff-surface-raised);
+  --el-fill-color-light: #242820;
+  --el-fill-color-lighter: #2a3027;
+  --el-fill-color-extra-light: rgba(243, 241, 232, 0.04);
+  --el-border-color: var(--ff-border);
+  --el-border-color-light: var(--ff-border);
+  --el-border-color-lighter: rgba(243, 241, 232, 0.1);
+  --el-border-color-extra-light: rgba(243, 241, 232, 0.06);
+  --el-text-color-primary: var(--ff-text);
+  --el-text-color-regular: var(--ff-text-secondary);
+  --el-text-color-secondary: var(--ff-text-muted);
+  --el-text-color-placeholder: var(--ff-text-muted);
+  --el-disabled-bg-color: rgba(41, 45, 37, 0.6);
+  --el-disabled-text-color: rgba(167, 169, 158, 0.45);
+  --el-disabled-border-color: rgba(52, 58, 48, 0.72);
+  --el-border-radius-base: 8px;
+  --el-border-radius-small: 6px;
+  --el-font-family: var(--ff-font-ui);
+}
+
+body :is(.el-overlay, .el-popper, .el-picker__popper, .el-select__popper) {
+  color: var(--ff-text) !important;
+}
+
+body :is(
+  .el-dialog,
+  .el-message-box,
+  .el-drawer,
+  .el-popover,
+  .el-picker-panel,
+  .el-select-dropdown,
+  .el-dropdown-menu,
+  .el-tooltip__popper,
+  .el-notification,
+  .el-message
+) {
+  color: var(--ff-text) !important;
+  border: 1px solid var(--ff-border) !important;
+  border-radius: 8px !important;
+  background:
+    linear-gradient(145deg, rgba(32, 35, 29, 0.98), rgba(13, 15, 11, 0.98)),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 8px) !important;
+  box-shadow: var(--ff-shadow-panel) !important;
+}
+
+body .el-overlay {
+  background-color: rgba(0, 0, 0, 0.68) !important;
+  backdrop-filter: blur(10px);
+}
+
+body :is(.el-dialog__title, .el-drawer__title, .el-message-box__title, .el-form-item__label) {
+  color: var(--ff-text) !important;
+}
+
+body :is(.el-dialog__body, .el-message-box__message, .el-drawer__body, .el-form-item__content) {
+  color: var(--ff-text-secondary) !important;
+}
+
+body :is(.el-button, .el-input__wrapper, .el-textarea__inner, .el-select__wrapper, .el-date-editor) {
+  min-height: 44px;
+}
+

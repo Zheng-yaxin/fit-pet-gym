@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.modules.equipment.mapper.EquipmentCategoryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gym.modules.equipment.domain.entity.EquipmentCategory">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="sort" property="sort"/>
+        <result column="description" property="description"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <!-- 查询所有分类（用于构建树） -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM gym_equipment_category
+        WHERE deleted = 0
+        ORDER BY sort ASC, id ASC
+    </select>
+
+    <!-- 查询子分类数量 -->
+    <select id="selectChildCount" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM gym_equipment_category
+        WHERE parent_id = #{id} AND deleted = 0
+    </select>
+
+</mapper>

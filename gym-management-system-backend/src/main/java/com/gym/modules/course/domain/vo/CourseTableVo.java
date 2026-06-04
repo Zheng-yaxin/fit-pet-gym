@@ -1,0 +1,1 @@
+package com.gym.modules.course.domain.vo;

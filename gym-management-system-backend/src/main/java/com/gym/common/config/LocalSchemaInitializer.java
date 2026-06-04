@@ -18,6 +18,7 @@ public class LocalSchemaInitializer {
     public void initialize() {
         ensureExerciseColumns();
         ensureMemberGrowthTable();
+        ensureFeedbackColumns();
     }
 
     private void ensureMemberGrowthTable() {
@@ -66,6 +67,33 @@ public class LocalSchemaInitializer {
         }
     }
 
+    private void ensureFeedbackColumns() {
+        List<ColumnDefinition> columns = List.of(
+                new ColumnDefinition("booking_id", "bigint NULL"),
+                new ColumnDefinition("feedback_type", "varchar(32) DEFAULT 'course'"),
+                new ColumnDefinition("handle_status", "varchar(32) DEFAULT 'pending'"),
+                new ColumnDefinition("admin_reply", "varchar(1000) NULL"),
+                new ColumnDefinition("follow_up_required", "tinyint DEFAULT 0"),
+                new ColumnDefinition("handle_time", "datetime NULL")
+        );
+
+        for (ColumnDefinition column : columns) {
+            if (!columnExists("gym_course_feedback", column.name())) {
+                jdbcTemplate.execute("ALTER TABLE gym_course_feedback ADD COLUMN " + column.name() + " " + column.definition());
+            }
+        }
+
+        ensureIndex("gym_course_feedback", "idx_course_feedback_booking_id", "booking_id");
+        ensureIndex("gym_course_feedback", "idx_course_feedback_type", "feedback_type");
+        ensureIndex("gym_course_feedback", "idx_course_feedback_handle_status", "handle_status");
+    }
+
+    private void ensureIndex(String tableName, String indexName, String columnName) {
+        if (!indexExists(tableName, indexName)) {
+            jdbcTemplate.execute("CREATE INDEX " + indexName + " ON " + tableName + " (" + columnName + ")");
+        }
+    }
+
     private boolean columnExists(String tableName, String columnName) {
         Integer count = jdbcTemplate.queryForObject(
                 """
@@ -78,6 +106,22 @@ public class LocalSchemaInitializer {
                 Integer.class,
                 tableName,
                 columnName
+        );
+        return count != null && count > 0;
+    }
+
+    private boolean indexExists(String tableName, String indexName) {
+        Integer count = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM information_schema.STATISTICS
+                WHERE TABLE_SCHEMA = DATABASE()
+                  AND TABLE_NAME = ?
+                  AND INDEX_NAME = ?
+                """,
+                Integer.class,
+                tableName,
+                indexName
         );
         return count != null && count > 0;
     }

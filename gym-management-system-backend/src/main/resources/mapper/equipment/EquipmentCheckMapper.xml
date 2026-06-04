@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.modules.equipment.mapper.EquipmentCheckMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.gym.modules.equipment.domain.entity.EquipmentCheck">
+        <id column="id" property="id"/>
+        <result column="equipment_id" property="equipmentId"/>
+        <result column="checker_id" property="checkerId"/>
+        <result column="check_time" property="checkTime"/>
+        <result column="result" property="result"/>
+        <result column="abnormal_desc" property="abnormalDesc"/>
+        <result column="suggestion" property="suggestion"/>
+        <result column="create_time" property="createTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <!-- 分页查询巡检记录（关联器材名称） -->
+    <resultMap id="EquipmentCheckVOResultMap" type="com.gym.modules.equipment.domain.vo.EquipmentCheckVO">
+        <id column="id" property="id"/>
+        <result column="equipment_id" property="equipmentId"/>
+        <result column="equipment_name" property="equipmentName"/>
+        <result column="checker_id" property="checkerId"/>
+        <result column="checker_name" property="checkerName"/>
+        <result column="check_time" property="checkTime"/>
+        <result column="result" property="result"/>
+        <result column="abnormal_desc" property="abnormalDesc"/>
+        <result column="suggestion" property="suggestion"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectPageWithRelations" resultMap="EquipmentCheckVOResultMap">
+        SELECT c.*, e.name AS equipment_name, u.nickname AS checker_name
+        FROM gym_equipment_check c
+        LEFT JOIN gym_equipment e ON c.equipment_id = e.id AND e.deleted = 0
+        LEFT JOIN sys_user u ON c.checker_id = u.user_id
+        WHERE c.deleted = 0
+        <if test="equipmentId != null and equipmentId != ''">
+            AND c.equipment_id = #{equipmentId}
+        </if>
+        <if test="checkerId != null and checkerId != ''">
+            AND c.checker_id = #{checkerId}
+        </if>
+        <if test="result != null and result != ''">
+            AND c.result = #{result}
+        </if>
+        <!-- 修复时间筛选的特殊字符 -->
+        <if test="startTime != null and startTime != ''">
+            <![CDATA[ AND c.check_time >= #{startTime} ]]>
+        </if>
+        <if test="endTime != null and endTime != ''">
+            <![CDATA[ AND c.check_time <= #{endTime} ]]>
+        </if>
+        ORDER BY c.check_time DESC
+    </select>
+
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.modules.course.mapper.CourseEnrollmentMapper">
+
+    <resultMap id="BaseResultMap" type="com.gym.modules.course.domain.entity.CourseEnrollment">
+        <id column="id" property="id" />
+        <result column="member_id" property="memberId" />
+        <result column="schedule_id" property="scheduleId" />
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <resultMap id="EnrollmentDetailVoMap" type="com.gym.modules.course.domain.vo.EnrollmentDetailVo">
+        <id column="id" property="id" />
+        <result column="member_id" property="memberId" />
+        <result column="member_name" property="memberName" />
+        <result column="member_phone" property="memberPhone" />
+        <result column="schedule_id" property="scheduleId" />
+        <result column="course_id" property="courseId" />
+        <result column="course_name" property="courseName" />
+        <result column="duration" property="duration" />
+        <result column="price" property="price" />
+        <result column="coach_id" property="coachId" />
+        <result column="coach_name" property="coachName" />
+        <result column="class_time" property="classTime" />
+        <result column="day_of_week" property="dayOfWeek" />
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+
+        <result column="status" property="status" />
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, member_id, schedule_id, status, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectMemberEnrollments" resultMap="EnrollmentDetailVoMap">
+        SELECT
+        e.id,
+        e.member_id,
+        m.name as member_name,
+        m.phone as member_phone,
+        e.schedule_id,
+        c.id as course_id,
+        c.name as course_name,
+        c.duration,
+        c.price,
+        co.id as coach_id,
+        co.name as coach_name,
+        s.class_time,
+        s.day_of_week,
+        s.start_time,
+        s.end_time,
+        e.status,
+        e.create_time
+        FROM gym_course_enrollment e
+        LEFT JOIN gym_member m ON e.member_id = m.id
+        LEFT JOIN gym_class_schedule s ON e.schedule_id = s.id
+        LEFT JOIN gym_course c ON s.course_id = c.id
+        LEFT JOIN gym_coach co ON s.coach_id = co.id
+        WHERE e.deleted = 0
+        AND e.member_id = #{memberId}
+        <if test="status != null and status != ''">
+            AND e.status = #{status}
+        </if>
+        ORDER BY e.create_time DESC
+    </select>
+
+    <select id="selectEnrollmentList" resultMap="EnrollmentDetailVoMap">
+        SELECT
+        e.id,
+        e.member_id,
+        m.name as member_name,
+        m.phone as member_phone,
+        e.schedule_id,
+        c.id as course_id,
+        c.name as course_name,
+        c.duration,
+        c.price,
+        co.id as coach_id,
+        co.name as coach_name,
+        s.class_time,
+        s.day_of_week,
+        s.start_time,
+        s.end_time,
+        e.status,
+        e.create_time
+        FROM gym_course_enrollment e
+        LEFT JOIN gym_member m ON e.member_id = m.id
+        LEFT JOIN gym_class_schedule s ON e.schedule_id = s.id
+        LEFT JOIN gym_course c ON s.course_id = c.id
+        LEFT JOIN gym_coach co ON s.coach_id = co.id
+        WHERE e.deleted = 0
+        <if test="query.memberId != null">
+            AND e.member_id = #{query.memberId}
+        </if>
+        <if test="query.courseId != null">
+            AND c.id = #{query.courseId}
+        </if>
+        <if test="query.coachId != null">
+            AND co.id = #{query.coachId}
+        </if>
+        <if test="query.status != null and query.status != ''">
+            AND e.status = #{query.status}
+        </if>
+        <if test="query.startDate != null">
+            AND s.class_time &gt;= #{query.startDate}
+        </if>
+        <if test="query.endDate != null">
+            AND s.class_time &lt;= #{query.endDate}
+        </if>
+        ORDER BY e.create_time DESC
+    </select>
+
+    <select id="selectEnrollmentStats" resultType="com.gym.modules.course.domain.vo.EnrollmentStatsVo">
+        SELECT
+            COUNT(*) as totalEnrollments,
+            SUM(CASE WHEN status = '2' THEN 1 ELSE 0 END) as completedCount,
+            SUM(CASE WHEN status = '1' THEN 1 ELSE 0 END) as cancelledCount,
+            SUM(CASE WHEN status = '0' THEN 1 ELSE 0 END) as pendingCount,
+            SUM(CASE WHEN DATE(create_time) = CURDATE() THEN 1 ELSE 0 END) as todayEnrollments,
+            SUM(CASE WHEN create_time >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY) THEN 1 ELSE 0 END) as weekEnrollments
+        FROM gym_course_enrollment
+        WHERE deleted = 0
+    </select>
+
+</mapper>

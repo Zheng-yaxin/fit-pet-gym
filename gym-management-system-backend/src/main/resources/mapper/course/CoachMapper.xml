@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.gym.modules.coach.mapper.CoachMapper">
+
+    <resultMap id="BaseResultMap" type="com.gym.modules.coach.domain.entity.Coach">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="specialties" property="specialties"/>
+        <result column="bio" property="bio"/>
+        <result column="avatar" property="avatar"/>
+        <result column="status" property="status"/>
+        <result column="gender" property="gender"/>
+        <result column="experience_years" property="experienceYears"/>
+        <result column="certification" property="certification"/>
+        <result column="hourly_rate" property="hourlyRate"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, phone, specialties, bio, avatar, status, gender, experience_years, certification, hourly_rate, create_time, update_time, deleted
+    </sql>
+
+    <select id="selectCoachList" parameterType="map" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gym_coach
+        WHERE deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (name LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="status != null and status != ''">
+            AND status = #{status}
+        </if>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectCoachById" parameterType="long" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gym_coach
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectAllCoaches" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM gym_coach
+        WHERE deleted = 0 AND status = '0'
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insertCoach" parameterType="com.gym.modules.coach.domain.entity.Coach">
+        INSERT INTO gym_coach (
+            name, phone, specialties, bio, avatar, status,
+            gender, experience_years, certification, hourly_rate,
+            create_time, update_time, deleted
+        ) VALUES (
+                     #{name}, #{phone}, #{specialties}, #{bio}, #{avatar}, #{status},
+                     #{gender}, #{experienceYears}, #{certification}, #{hourlyRate},
+                     #{createTime}, #{updateTime}, 0
+                 )
+    </insert>
+
+    <update id="updateCoach" parameterType="com.gym.modules.coach.domain.entity.Coach">
+        UPDATE gym_coach
+        <set>
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="specialties != null and specialties != ''">specialties = #{specialties},</if>
+            <if test="bio != null">bio = #{bio},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="experienceYears != null">experience_years = #{experienceYears},</if>
+            <if test="certification != null">certification = #{certification},</if>
+            <if test="hourlyRate != null">hourly_rate = #{hourlyRate},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteCoachById" parameterType="long">
+        UPDATE gym_coach
+        SET deleted = 1, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+</mapper>

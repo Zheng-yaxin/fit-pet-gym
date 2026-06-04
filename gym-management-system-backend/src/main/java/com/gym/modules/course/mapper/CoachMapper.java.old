@@ -1,0 +1,24 @@
+// gym-management-system-backend/src/main/java/com/gym/modules/course/mapper/CoachMapper.java
+package com.gym.modules.course.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.gym.modules.course.domain.entity.Coach;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+import java.util.Map;
+
+@Mapper
+public interface CoachMapper extends BaseMapper<Coach> {
+    List<Coach> selectCoachList(Map<String, Object> params);
+
+    Coach selectCoachById(Long id);
+
+    List<Coach> selectAllCoaches();
+
+    int insertCoach(Coach coach);
+
+    int updateCoach(Coach coach);
+
+    int deleteCoachById(Long id);
+}

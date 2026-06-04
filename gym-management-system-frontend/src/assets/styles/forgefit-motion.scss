@@ -1,0 +1,50 @@
+:root {
+  --ff-motion-fast: 120ms;
+  --ff-motion-base: 180ms;
+  --ff-motion-panel: 260ms;
+  --ff-motion-feature: 420ms;
+  --ff-ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+  --ff-ease-exit: cubic-bezier(0.7, 0, 0.84, 0);
+  --ff-ease-press: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: var(--ff-ease-enter);
+  --ease-spring: var(--ff-ease-press);
+}
+
+.forgefit-app-shell :is(
+  button,
+  a,
+  .el-button,
+  .el-card,
+  .el-table__row,
+  .nav-link,
+  .nav-item,
+  .action-item,
+  .slate-card,
+  .widget-card,
+  .traffic-card,
+  .exercise-card
+) {
+  transition:
+    transform var(--ff-motion-base) var(--ff-ease-enter),
+    opacity var(--ff-motion-base) var(--ff-ease-enter),
+    color var(--ff-motion-base) var(--ff-ease-enter),
+    background-color var(--ff-motion-base) var(--ff-ease-enter),
+    border-color var(--ff-motion-base) var(--ff-ease-enter),
+    box-shadow var(--ff-motion-base) var(--ff-ease-enter) !important;
+}
+
+.forgefit-app-shell :is(button, a, .el-button, .nav-link, .nav-item, .action-item):active {
+  transform: scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
