@@ -49,6 +49,12 @@ public class TrainingController {
         return R.ok(planService.current(SecurityUtils.getUserId()));
     }
 
+    @GetMapping("/checkin/active")
+    @Operation(summary = "获取当前进行中的训练打卡")
+    public R<TrainingCheckin> activeCheckin() {
+        return R.ok(checkinService.active(SecurityUtils.getUserId()));
+    }
+
     @PostMapping("/checkin/start")
     @Operation(summary = "开始训练打卡")
     public R<TrainingCheckin> startCheckin(@RequestParam(name = "planId", required = false) Long planId) {
@@ -56,9 +62,20 @@ public class TrainingController {
     }
 
     @PostMapping("/checkin/end")
-    @Operation(summary = "结束训练打卡")
+    @Operation(summary = "结束训练打卡并自动生成训练日志")
     public R<TrainingCheckin> endCheckin(@RequestParam("checkinId") Long checkinId) {
-        return R.ok(checkinService.end(SecurityUtils.getUserId(), checkinId));
+        TrainingCheckin checkin = checkinService.end(SecurityUtils.getUserId(), checkinId);
+        TrainingLog log = new TrainingLog();
+        log.setMemberId(checkin.getMemberId());
+        log.setPlanId(checkin.getPlanId());
+        log.setTrainingDate(checkin.getEndTime());
+        log.setDurationMinutes(checkin.getDurationMinutes());
+        log.setIntensity(5);
+        log.setCaloriesBurned(Math.max(0, checkin.getDurationMinutes() == null ? 0 : checkin.getDurationMinutes() * 6));
+        log.setFeeling("已完成");
+        log.setRemark("训练执行器自动生成");
+        logService.save(log);
+        return R.ok(checkin);
     }
 
     @PostMapping("/logs")

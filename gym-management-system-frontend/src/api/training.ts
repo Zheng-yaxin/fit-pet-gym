@@ -59,3 +59,10 @@ export function getAdminTrainingReviews() {
     method: 'get'
   })
 }
+
+export function getAdminActiveTrainingCheckins() {
+  return request({
+    url: '/admin/training/checkins/active',
+    method: 'get'
+  })
+}
