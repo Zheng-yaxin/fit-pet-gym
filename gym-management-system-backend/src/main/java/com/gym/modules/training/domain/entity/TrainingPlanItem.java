@@ -17,4 +17,22 @@ public class TrainingPlanItem {
 
     @TableField(exist = false)
     private String exerciseName;
+
+    @TableField(exist = false)
+    private String targetMuscle;
+
+    @TableField(exist = false)
+    private String equipment;
+
+    @TableField(exist = false)
+    private String difficulty;
+
+    @TableField(exist = false)
+    private String videoUrl;
+
+    @TableField(exist = false)
+    private String steps;
+
+    @TableField(exist = false)
+    private String tips;
 }

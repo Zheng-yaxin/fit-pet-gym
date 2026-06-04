@@ -207,6 +207,33 @@ export type TrainingGrowth = {
   lastRewardReason?: string;
 };
 
+export type TrainingPlanItem = {
+  id?: number;
+  planDayId?: number;
+  exerciseId?: number;
+  exerciseName?: string;
+  targetMuscle?: string;
+  equipment?: string;
+  difficulty?: string;
+  videoUrl?: string;
+  steps?: string;
+  tips?: string;
+  sets?: number;
+  reps?: string;
+  restSeconds?: number;
+  sortOrder?: number;
+};
+
+export type TrainingPlanDay = {
+  id?: number;
+  planId?: number;
+  dayIndex?: number;
+  title?: string;
+  targetMuscle?: string;
+  estimatedMinutes?: number;
+  items?: TrainingPlanItem[];
+};
+
 export type TrainingPlan = {
   id?: number;
   name?: string;
@@ -215,6 +242,7 @@ export type TrainingPlan = {
   weeklyFrequency?: number;
   startDate?: string;
   endDate?: string;
+  days?: TrainingPlanDay[];
 };
 
 export type TrainingPlanPayload = {

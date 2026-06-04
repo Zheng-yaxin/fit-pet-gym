@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, Clock3, Dumbbell, Play, Plus, Save, Sparkles, Square } from "lucide-react";
+import { ArrowLeft, BookOpenCheck, Clock3, Dumbbell, Play, Plus, Save, Sparkles, Square } from "lucide-react";
 import { FeatureMotionDirector } from "@/components/motion/feature-motion-director";
 import { FeatureStatusCard } from "@/components/motion/feature-status-card";
 import {
@@ -63,6 +63,7 @@ export default function TrainingPage() {
   const level = numberValue(growth?.level ?? review?.level, 1);
   const streakDays = numberValue(growth?.streakDays ?? review?.streakDays);
   const badgeTitle = growth?.badgeTitle ?? review?.badgeTitle;
+  const planDays = plan?.days ?? [];
 
   const weeklyProgressStyle = useMemo(
     () => ({ width: `${Math.min(100, Math.round((weeklyMinutes / 150) * 100))}%` }),
@@ -279,6 +280,49 @@ export default function TrainingPage() {
               )}
             </div>
           </section>
+
+          {planDays.length > 0 ? (
+            <section className="fitpet-record-section" aria-label="Plan prescription">
+              <div className="feature-heading">
+                <span>Plan prescription</span>
+                <h2>Today-ready exercise map</h2>
+                <p>Each generated plan now carries real exercise-library teaching fields from the backend.</p>
+              </div>
+              <div className="feature-grid two">
+                {planDays.map((day) => (
+                  <article className="feature-list compact" key={day.id ?? day.dayIndex}>
+                    <h2>
+                      <BookOpenCheck size={18} />
+                      Day {day.dayIndex ?? "--"} - {day.title ?? "Training day"}
+                    </h2>
+                    <p>
+                      <span>{day.targetMuscle ?? "Full body"}</span>
+                      <strong>{day.estimatedMinutes ?? "--"} min</strong>
+                    </p>
+                    {(day.items ?? []).map((item) => (
+                      <div className="feature-row" key={item.id ?? `${day.dayIndex}-${item.sortOrder}`}>
+                        <div>
+                          <h3>{item.exerciseName ?? "Exercise"}</h3>
+                          <p>
+                            {item.sets ?? "--"} sets x {item.reps ?? "--"} reps - Rest {item.restSeconds ?? "--"}s
+                          </p>
+                          <p>
+                            {[item.targetMuscle, item.equipment, item.difficulty].filter(Boolean).join(" - ") || "Library detail pending"}
+                          </p>
+                          {item.tips ? <p>{item.tips}</p> : null}
+                        </div>
+                        {item.videoUrl ? (
+                          <a className="feature-link-button" href={item.videoUrl} target="_blank" rel="noreferrer">
+                            Demo
+                          </a>
+                        ) : null}
+                      </div>
+                    ))}
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <div className="feature-grid two">
             <form className="feature-form" onSubmit={handleGenerate}>

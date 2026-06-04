@@ -128,9 +128,21 @@ public class TrainingPlanServiceImpl extends ServiceImpl<TrainingPlanMapper, Tra
             return;
         }
 
-        Map<Long, String> names = exerciseMapper.selectBatchIds(exerciseIds).stream()
-                .collect(Collectors.toMap(Exercise::getId, Exercise::getName));
-        items.forEach(item -> item.setExerciseName(names.get(item.getExerciseId())));
+        Map<Long, Exercise> exercises = exerciseMapper.selectBatchIds(exerciseIds).stream()
+                .collect(Collectors.toMap(Exercise::getId, exercise -> exercise));
+        items.forEach(item -> {
+            Exercise exercise = exercises.get(item.getExerciseId());
+            if (exercise == null) {
+                return;
+            }
+            item.setExerciseName(exercise.getName());
+            item.setTargetMuscle(exercise.getTargetMuscle());
+            item.setEquipment(exercise.getEquipment());
+            item.setDifficulty(exercise.getDifficulty());
+            item.setVideoUrl(exercise.getVideoUrl());
+            item.setSteps(exercise.getSteps());
+            item.setTips(exercise.getTips());
+        });
     }
 
     private Map<String, Long> loadExerciseIds(List<DayTemplate> templates) {

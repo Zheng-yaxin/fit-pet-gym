@@ -32,7 +32,32 @@
         <el-descriptions-item label="来源">{{ currentPlan.source }}</el-descriptions-item>
         <el-descriptions-item label="状态">{{ currentPlan.status === '0' ? '启用' : '停用' }}</el-descriptions-item>
       </el-descriptions>
-      <el-empty v-else description="暂无训练计划" />
+      <el-collapse v-if="currentPlan?.days?.length" class="plan-days">
+        <el-collapse-item
+          v-for="day in currentPlan.days"
+          :key="day.id || day.dayIndex"
+          :title="`Day ${day.dayIndex || '--'} - ${day.title || 'Training day'}`"
+          :name="String(day.id || day.dayIndex)"
+        >
+          <div class="day-meta">
+            <el-tag>{{ day.targetMuscle || 'Full body' }}</el-tag>
+            <el-tag type="success">{{ day.estimatedMinutes || '--' }} min</el-tag>
+          </div>
+          <el-table :data="day.items || []" size="small" border>
+            <el-table-column prop="exerciseName" label="Exercise" min-width="150" />
+            <el-table-column label="Prescription" min-width="130">
+              <template #default="{ row }">
+                {{ row.sets || '--' }} x {{ row.reps || '--' }} / {{ row.restSeconds || '--' }}s
+              </template>
+            </el-table-column>
+            <el-table-column prop="targetMuscle" label="Muscle" min-width="120" />
+            <el-table-column prop="equipment" label="Equipment" min-width="120" />
+            <el-table-column prop="difficulty" label="Difficulty" width="110" />
+            <el-table-column prop="tips" label="Teaching tip" min-width="220" show-overflow-tooltip />
+          </el-table>
+        </el-collapse-item>
+      </el-collapse>
+      <el-empty v-if="!currentPlan" description="暂无训练计划" />
     </el-card>
   </div>
 </template>
@@ -65,4 +90,6 @@ h1 { margin: 0; font-size: 28px; color: #1f2937; }
 .summary { margin: 10px 0 0; color: #64748b; }
 .panel { margin-bottom: 18px; border-radius: 8px; border: 1px solid #e5e7eb; }
 .w-full { width: 100%; }
+.plan-days { margin-top: 16px; }
+.day-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 </style>
